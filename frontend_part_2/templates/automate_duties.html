@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/automate_duties_page.css') }}">
+    <title>Automate Duties</title>
+</head>
+<body>
+    <h1>Automate Duties</h1>
+
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Duty</th>
+                <th>Description</th>
+                <th>KSBS</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for duty in duties %}
+            <tr>
+                <td>{{ duty.number }}</td>
+                <td>{{ duty.description }}</td>
+                <td>{{ duty.ksbs | join(', ') }}</td>
+
+                <td>
+                    {% if duty.complete %}
+                        <span class="status-complete">Duty Complete</span>
+                    {% else %}
+                        <span class="status-not-complete">Duty Not Complete</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if not duty.complete %}
+                        <form method="POST" action="{{ url_for('complete_duty', number=duty.number) }}" class="inline-form">
+                            <button type="submit" class="complete-btn">Mark Complete</button>
+                        </form>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('delete_duty', number=duty.number) }}" class="inline-form">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+
+                    <form method="GET" action="{{ url_for('edit_duty', number=duty.number) }}" class="inline-form">
+                        <button type="submit" class="edit-btn">Edit</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="add-duty-form-container">
+        <h2>Add a New Duty</h2>
+        <form action="{{ url_for('add_automate_duty') }}" method="post">
+            <label>Duty Number: 
+                <input type="text" name="number" class="text-input" required/>
+            </label>
+
+            <label>Duty Description: 
+                <input type="text" name="description" class="text-input"/>
+            </label>
+
+            <label>Knowledge, Skills, and Behaviours (separate with a comma): 
+                <input type="text" name="ksbs" class="text-input"/>
+            </label>
+
+            <button class="add-duty-button" type="submit">Add Duty</button>
+        </form>
+    </div>
+
+    <div class="reset-container">
+        <form method="POST" action="{{ url_for('reset_duties') }}">
+            <button type="submit" class="reset-button">Reset Duties</button>
+        </form>
+    </div>
+
+</body>
+</html>
+
