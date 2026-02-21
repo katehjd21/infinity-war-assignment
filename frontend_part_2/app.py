@@ -14,7 +14,7 @@ def coin_page(coin_id):
     coin = CoinController.fetch_coin_by_id(coin_id)
     if not coin:
         return "Coin not found", 404
-    return render_template("coin.html", coin=coin)
+    return render_template("single_coin.html", coin=coin)
 
 @app.route('/automate', methods=['GET'])
 def automate_page():
@@ -89,5 +89,5 @@ def reset_duties():
     return redirect(url_for('automate_page'))
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080, debug=True)
  
