@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template, request
 from controllers.duty_controller import DutyController
 from controllers.coin_controller import CoinController
 
@@ -18,10 +18,11 @@ def coin_page(coin_id):
 
 @app.route("/duties/<duty_code>")
 def duty_page(duty_code):
+    coin_id = request.args.get("coin_id") 
     duty = DutyController().fetch_duty(duty_code)
     if not duty:
         return "Duty not found", 404
-    return render_template("duty_detail.html", duty=duty)
+    return render_template("duty_detail.html", duty=duty, coin_id=coin_id)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

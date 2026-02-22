@@ -1,30 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/coins.css') }}">
-    <title>{{ duty.code }} - {{ duty.name }}</title>
-</head>
-<body>
-    <h1>{{ duty.code }} - {{ duty.name }}</h1>
+{% extends "base.html" %}
 
-    <h2>Description</h2>
-    <p>{{ duty.description }}</p>
+{% block content %}
+<h1>{{ duty.code }} – {{ duty.name }}</h1>
 
-    <h2>Coins associated with this duty</h2>
-    {% if duty.coins %}
-        <ul>
-        {% for coin in duty.coins %}
-            <li>
-                <a href="{{ url_for('coin_page', coin_id=coin['id']) }}">{{ coin['name'] }}</a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No coins associated with this duty.</p>
+<h2>Description</h2>
+<div class="description-box">
+    {{ duty.description }}
+</div>
+
+<h2>Coins Associated</h2>
+
+{% if duty.coins %}
+<div class="grid">
+    {% for coin in duty.coins %}
+    <div class="card">
+        <a href="{{ url_for('coin_page', coin_id=coin['id']) }}">
+            {{ coin['name'] }}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="muted">No coins associated with this duty.</p>
+{% endif %}
+
+<div class="button-row">
+    {% if coin_id %}
+        <a class="back-button secondary"
+           href="{{ url_for('coin_page', coin_id=coin_id) }}">
+            ← Back to coin
+        </a>
     {% endif %}
 
-    <p><a href="{{ url_for('landing_page') }}">Back to all coins</a></p>
-</body>
-</html>
+    <a class="back-button primary"
+       href="{{ url_for('landing_page') }}">
+        Back to all coins
+    </a>
+</div>
+{% endblock %}
