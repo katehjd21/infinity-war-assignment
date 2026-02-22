@@ -1,22 +1,24 @@
+import requests
+
 class Duty:
-    def __init__(self, number, description, ksbs):
-        self.number = number
+    def __init__(self, code, name, description, coins=None):
+        self.code = code
+        self.name = name
         self.description = description
-        self.ksbs = ksbs
-        self.complete = False
-    
-    @staticmethod
-    def get_duty():
-      return Duty(1, "Random Duty Description", ["Knowledge", "Skills", "Behaviours"])
+        self.coins = coins or [] 
 
-    def mark_complete(self):
-        self.complete = True
-
-    def save(self):
-      print(f"Duty {self.number} has been saved!")
-  
-    def is_complete(self):
-      if self.complete:
-        return "Duty Complete!"
-      else:
-        return "Duty Not Completed!"
+    @classmethod
+    def fetch_duty_from_backend(cls, duty_code):
+        try:
+            response = requests.get(f"http://localhost:5000/duties/{duty_code}")
+            response.raise_for_status()
+            data = response.json()
+            return cls(
+                code=data["code"],
+                name=data.get("name", ""),
+                description=data.get("description", ""),
+                coins=data.get("coins", [])
+            )
+        except requests.RequestException as e:
+            print(f"Error fetching duty {duty_code}:", e)
+            return None

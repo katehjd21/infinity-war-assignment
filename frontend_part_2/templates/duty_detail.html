@@ -4,26 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/coins.css') }}">
-    <title>{{ coin.name }}</title>
+    <title>{{ duty.code }} - {{ duty.name }}</title>
 </head>
 <body>
-    <h1>{{ coin.name }}</h1>
-    
-    {% if coin.duties %}
-        <h2>Related Duties</h2>
-        <ul class="duties-list">
-        {% for duty in coin.duties %}
+    <h1>{{ duty.code }} - {{ duty.name }}</h1>
+
+    <h2>Description</h2>
+    <p>{{ duty.description }}</p>
+
+    <h2>Coins associated with this duty</h2>
+    {% if duty.coins %}
+        <ul>
+        {% for coin in duty.coins %}
             <li>
-                <a href="{{ url_for('duty_page', duty_code=duty['code']) }}">
-                    {{ duty['code'] }} - {{ duty['name'] }}
-                </a>
+                <a href="{{ url_for('coin_page', coin_id=coin['id']) }}">{{ coin['name'] }}</a>
             </li>
         {% endfor %}
         </ul>
     {% else %}
-        <p>No duties associated with this coin.</p>
+        <p>No coins associated with this duty.</p>
     {% endif %}
-    
+
     <p><a href="{{ url_for('landing_page') }}">Back to all coins</a></p>
 </body>
 </html>

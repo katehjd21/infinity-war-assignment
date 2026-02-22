@@ -1,7 +1,7 @@
 import pytest
 from app import app
 from models.coin import Coin
-from controllers.coin_controller import CoinController
+from models.duty import Duty
 
 @pytest.fixture
 def client():
@@ -9,8 +9,17 @@ def client():
     with app.test_client() as client:
         yield client
 
-import pytest
-from models.coin import Coin
+@pytest.fixture
+def mocked_coin():
+    coin = Coin(
+            "Automate",
+            "11111111-1111-1111-1111-111111111111",
+            duties=[
+                {"code": "D1", "name": "Duty 1", "description": "Duty 1 Description"},
+                {"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"},
+            ]
+        )
+    return coin
 
 @pytest.fixture
 def mocked_coins():
@@ -46,3 +55,57 @@ def mocked_coins():
             duties=[]
         ),
     ]
+
+@pytest.fixture
+def mocked_coins_response():
+    return [
+        {
+            "name": "Automate",
+            "id": "11111111-1111-1111-1111-111111111111",
+            "duties": [
+                {"code": "D1", "name": "Duty 1", "description": "Duty 1 Description"},
+                {"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"},
+            ]
+        },
+        {
+            "name": "Houston",
+            "id": "22222222-2222-2222-2222-222222222222",
+            "duties": [
+                {"code": "D3", "name": "Duty 3", "description": "Duty 3 Description"},
+            ]
+        },
+        {
+            "name": "Security",
+            "id": "33333333-3333-3333-3333-333333333333",
+            "duties": [
+                {"code": "D4", "name": "Duty 4", "description": "Duty 4 Description"},
+                {"code": "D5", "name": "Duty 5", "description": "Duty 5 Description"},
+            ]
+        },
+        {
+            "name": "GoingDeeper",
+            "id": "44444444-4444-4444-4444-444444444444",
+            "duties": []  
+        },
+        {
+            "name": "Assemble",
+            "id": "55555555-5555-5555-5555-555555555555"
+        },
+    ]
+
+@pytest.fixture
+def mocked_duty():
+    return Duty(
+        code="D1",
+        name="Duty 1",
+        description="Duty 1 Description",
+        coins=[
+            {"name": "Automate"},
+            {"name": "Houston"}
+        ]
+    )
+
+@pytest.fixture
+def mocked_duty_response():
+    duty_response = {"code": "D1", "name": "Duty 1", "description": "Duty 1 Description", "coins": [{"name": "Automate"}]}
+    return duty_response
