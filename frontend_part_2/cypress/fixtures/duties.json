@@ -1,0 +1,23 @@
+[
+  {
+    "code": "D1",
+    "name": "Duty 1",
+    "description": "Duty 1 Description",
+    "coins": [
+      {
+        "id": "uuid-1",
+        "name": "Automate"
+      },
+      {
+        "id": "uuid-2",
+        "name": "Houston"
+      }
+    ]
+  },
+  {
+    "code": "uuid-empty-duty",
+    "name": "Empty Duty",
+    "description": "No coins associated",
+    "coins": [] 
+  }
+]

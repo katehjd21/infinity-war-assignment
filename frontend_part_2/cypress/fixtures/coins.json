@@ -1,0 +1,78 @@
+[
+  {
+    "id": "uuid-1",
+    "name": "Automate",
+    "duties": [
+      {
+        "id": "duty-uuid-1",
+        "code": "D1",
+        "name": "Duty 1",
+        "description": "Duty 1 Description"
+      },
+      {
+        "id": "duty-uuid-2",
+        "code": "D2",
+        "name": "Duty 2",
+        "description": "Duty 2 Description"
+      }
+    ]
+  },
+  {
+    "id": "uuid-2",
+    "name": "Houston",
+    "duties": [
+      {
+        "id": "duty-uuid-1",
+        "code": "D1",
+        "name": "Duty 1",
+        "description": "Duty 1 Description"
+      }
+    ]
+  },
+  {
+    "id": "uuid-3",
+    "name": "Security",
+    "duties": [
+      {
+        "id": "duty-uuid-3",
+        "code": "D3",
+        "name": "Duty 3",
+        "description": "Duty 3 Description"
+      }
+    ]
+  },
+  {
+    "id": "uuid-4",
+    "name": "Going Deeper",
+    "duties": []
+  },
+  {
+    "id": "uuid-5",
+    "name": "Assemble",
+    "duties": [
+        {
+        "id": "duty-uuid-1",
+        "code": "D1",
+        "name": "Duty 1",
+        "description": "Duty 1 Description"
+      },
+      {
+        "id": "duty-uuid-2",
+        "code": "D2",
+        "name": "Duty 2",
+        "description": "Duty 2 Description"
+      },
+      {
+        "id": "duty-uuid-3",
+        "code": "D3",
+        "name": "Duty 3",
+        "description": "Duty 3 Description"
+      }
+    ]
+  },
+  {     
+    "id": "uuid-empty-coin", 
+    "name": "Empty Coin", 
+    "duties": []
+  }
+]

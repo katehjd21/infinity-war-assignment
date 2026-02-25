@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Apprenticeship Coins</h1>
+<div class="landing-page">
+    <h1>Apprenticeship Coins</h1>
 
-<div class="grid">
-    {% for coin in coins %}
-    <div class="card">
-        <a href="{{ url_for('coin_page', coin_id=coin.id) }}">
-            {{ coin.name }}
-        </a>
+    {% if coins %}
+    <div class="grid">
+        {% for coin in coins %}
+        <div class="card">
+            <a href="{{ url_for('coin_page', coin_id=coin.id,  testing=request.args.get('testing'), fixture=request.args.get('fixture')) }}">
+                {{ coin.name }}
+            </a>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    {% else %}
+    <p class="no-coins-message muted">No Coins Available</p>
+    {% endif %}
 </div>
 {% endblock %}

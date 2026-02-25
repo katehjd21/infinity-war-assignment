@@ -1,3 +1,4 @@
+/* Reset & base */
 * {
     margin: 0;
     padding: 0;
@@ -17,6 +18,7 @@ body {
     padding: 60px 24px;
 }
 
+/* Headings */
 h1 {
     font-size: 2.8rem;
     font-weight: 700;
@@ -46,6 +48,7 @@ h2 {
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     transition: all 0.25s ease;
+    min-height: 110px;
 }
 
 .card:hover {
@@ -64,6 +67,7 @@ h2 {
     text-decoration: underline;
 }
 
+/* Description boxes */
 .description-box {
     background: white;
     padding: 30px;
@@ -71,15 +75,21 @@ h2 {
     box-shadow: 0 8px 24px rgba(0,0,0,0.05);
     line-height: 1.7;
     font-size: 1.05rem;
+    margin-bottom: 40px;
 }
 
-
-.muted {
+/* Muted / empty state messages */
+.muted,
+.no-coins-message,
+.no-duties-message {
+    text-align: center;
+    font-size: 1.2rem;
     color: #64748b;
-    margin-top: 20px;
+    margin-top: 40px;
+    font-weight: 500;
 }
 
-
+/* Buttons row */
 .button-row {
     margin-top: 50px;
     display: flex;
@@ -88,6 +98,7 @@ h2 {
     flex-wrap: wrap;
 }
 
+/* Back links / buttons */
 .back-link {
     display: inline-block;
     margin-top: 50px;
@@ -130,4 +141,35 @@ h2 {
 .back-button.secondary:hover {
     background: #2563eb;
     color: white;
+}
+
+/* Page-specific wrappers for scoping */
+
+/* Landing page */
+.landing-page .grid,
+.landing-page .card {
+    margin-bottom: 50px;
+}
+
+/* Single coin page */
+.single-coin-page .back-link {
+    margin-top: 30px;
+}
+
+/* Duty detail page */
+.duty-detail-page {
+    max-width: 800px;
+    margin: auto;
+}
+
+.duty-detail-page .grid {
+    margin-bottom: 40px;
+}
+
+.duty-detail-page .card {
+    padding: 20px;
+}
+
+.duty-detail-page .button-row {
+    margin-top: 40px;
 }
