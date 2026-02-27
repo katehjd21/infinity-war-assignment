@@ -110,16 +110,13 @@ def ksbs():
 
 
 @pytest.fixture
-def duty_with_ksb(duties):
+def duty_with_ksb(duties, ksbs):
     duty = duties[0]
+    knowledge, skill, behaviour = ksbs
 
-    knowledge = Knowledge.create(code="K1", name="Knowledge 1", description="Knowledge 1 Description")
-    skill = Skill.create(code="S1", name="Skill 1", description="Skill 1 Description")
-    behaviour = Behaviour.create(code="B1", name="Behaviour 1", description="Behaviour 1 Description")
-
-    DutyKnowledge.create(duty=duty, knowledge=knowledge)
-    DutySkill.create(duty=duty, skill=skill)
-    DutyBehaviour.create(duty=duty, behaviour=behaviour)
+    DutyKnowledge.get_or_create(duty=duty, knowledge=knowledge)
+    DutySkill.get_or_create(duty=duty, skill=skill)
+    DutyBehaviour.get_or_create(duty=duty, behaviour=behaviour)
 
     return duty, knowledge, skill, behaviour
 

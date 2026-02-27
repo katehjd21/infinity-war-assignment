@@ -1,4 +1,4 @@
-from utils.helper_functions import serialize_coin, serialize_coin_with_duties, serialize_duty, serialize_ksb, serialize_duty_with_coins, serialize_ksb_with_duties
+from utils.helper_functions import serialize_coin, serialize_coin_with_duties, serialize_duty, serialize_ksb, serialize_duty_with_coins_and_ksbs, serialize_ksb_with_duties
 
 
 # SERIALIZE COIN
@@ -81,21 +81,21 @@ def test_serialize_behaviour_returns_expected_keys_and_values(ksbs):
     assert result["description"] == behaviour.description
 
 
-# SERALIZE DUTY WITH COINS
+# SERALIZE DUTY WITH COINS AND KSBS
 def test_serialize_duty_with_coins_returns_expected_keys(duty_with_coins):
-    result = serialize_duty_with_coins(duty_with_coins)
-    assert set(result.keys()) == {"id", "code", "name", "description", "coins"}
+    result = serialize_duty_with_coins_and_ksbs(duty_with_coins)
+    assert set(result.keys()) == {"id", "code", "name", "description", "coins", "ksbs"}
 
 
 def test_serialize_duty_with_coins_ids_are_strings(duty_with_coins):
-    result = serialize_duty_with_coins(duty_with_coins)
+    result = serialize_duty_with_coins_and_ksbs(duty_with_coins)
     assert isinstance(result["id"], str)
     for coin in result["coins"]:
         assert isinstance(coin["id"], str)
 
 
 def test_serialize_duty_with_coins_has_correct_coins(duty_with_coins):
-    result = serialize_duty_with_coins(duty_with_coins)
+    result = serialize_duty_with_coins_and_ksbs(duty_with_coins)
     expected_coins = [{"id": str(duty_coin.coin.id), "name": duty_coin.coin.name} for duty_coin in duty_with_coins.duty_coins]
     assert result["coins"] == expected_coins
 

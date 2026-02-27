@@ -1,5 +1,5 @@
 from playhouse.shortcuts import model_to_dict
-
+from models import DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
 def serialize_coin(coin):
     coin_dict = model_to_dict(coin)
     coin_dict["id"] = str(coin_dict["id"])
@@ -36,11 +36,21 @@ def serialize_ksb(ksb, ksb_type):
     }
 
 
-def serialize_duty_with_coins(duty):
-    duty_dict = model_to_dict(duty)
-    duty_dict["id"] = str(duty.id)
-    duty_dict["coins"] = [{"id": str(dc.coin.id), "name": dc.coin.name} for dc in duty.duty_coins]
-    return duty_dict
+def serialize_duty_with_coins_and_ksbs(duty):
+    return {
+        "id": str(duty.id),
+        "code": duty.code,
+        "name": duty.name,
+        "description": duty.description,
+        "coins": [serialize_coin(dc.coin) for dc in DutyCoin.select().where(DutyCoin.duty == duty)],
+        "ksbs": [
+            k.knowledge.code for k in DutyKnowledge.select().where(DutyKnowledge.duty == duty)
+        ] + [
+            s.skill.code for s in DutySkill.select().where(DutySkill.duty == duty)
+        ] + [
+            b.behaviour.code for b in DutyBehaviour.select().where(DutyBehaviour.duty == duty)
+        ]
+    }
 
 
 def serialize_ksb_with_duties(ksb, ksb_type):
