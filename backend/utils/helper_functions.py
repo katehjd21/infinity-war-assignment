@@ -1,19 +1,30 @@
 from playhouse.shortcuts import model_to_dict
 from models import DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
+
 def serialize_coin(coin):
-    coin_dict = model_to_dict(coin)
-    coin_dict["id"] = str(coin_dict["id"])
-    return coin_dict
+    return {
+        "id": str(coin.id),
+        "name": coin.name
+    }
 
 
-def serialize_coin_with_duties(coin):
+def serialize_coin_with_duties(coin, include_completed=False):
     coin_dict = serialize_coin(coin)
 
     duties = []
     for duty_coin in coin.coin_duties:
-        duties.append({"id": str(duty_coin.duty.id), "code": duty_coin.duty.code, "name": duty_coin.duty.name, "description": duty_coin.duty.description})
+        duties.append({
+            "id": str(duty_coin.duty.id),
+            "code": duty_coin.duty.code,
+            "name": duty_coin.duty.name,
+            "description": duty_coin.duty.description
+        })
 
     coin_dict["duties"] = duties
+
+    if include_completed:
+        coin_dict["completed"] = coin.completed
+
     return coin_dict
 
 

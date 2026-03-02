@@ -1,19 +1,26 @@
-from pg_db_connection import pg_db
-from models import Duty, Coin, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
-from peewee import *
-
+from pg_db_connection import pg_db, database
+from models import (
+    Coin, Duty, Knowledge, Skill, Behaviour,
+    DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
+    User, RequestLog
+)
 
 def create_tables():
-    pg_db.connect()
+    if database.obj is None:
+        database.initialize(pg_db)
+
+    database.connect()
 
     tables = [
         Coin, Duty, Knowledge, Skill, Behaviour,
-        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
+        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
+        User, RequestLog
     ]
-    pg_db.create_tables(tables, safe=True)
-    print("Database tables created!")
 
-    pg_db.close()
+    database.create_tables(tables, safe=True)
+    print("All tables created!")
+
+    database.close()
 
 
 if __name__ == "__main__":

@@ -150,3 +150,27 @@ def test_patch_coin_returns_404_if_not_found_v2(client):
 
     assert response.status_code == 404
     assert response.json["description"] == "Coin not found."
+
+
+# PATCH COIN V3
+def test_patch_coin_updates_completed_v3(logged_in_admin, coin):
+    response = logged_in_admin.patch(f"/v3/coins/{coin.id}", json={"completed": True})
+    data = response.json
+    assert response.status_code == 200
+    assert data["completed"] is True
+
+def test_admin_can_patch_coin(logged_in_admin, coin):
+    response = logged_in_admin.patch(f"/v3/coins/{coin.id}", json={"name": "New Coin"})
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["name"] == "New Coin"
+
+
+def test_unauthenticated_user_cannot_patch_coin(client, coin):
+    response = client.patch(f"/v3/coins/{coin.id}", json={"name": "New Coin"})
+    assert response.status_code == 401
+
+
+def test_authenticated_user_cannot_patch_coin(logged_in_authenticated_user, coin):
+    response = logged_in_authenticated_user.patch(f"/v3/coins/{coin.id}", json={"name": "New Coin"})
+    assert response.status_code == 403

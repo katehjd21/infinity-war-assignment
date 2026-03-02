@@ -116,3 +116,12 @@ def test_get_coin_by_id_returns_id_name_and_associated_duties_v2(client, coin_wi
 
     assert set(data.keys()) == {"id", "name", "duties"}
     assert len(data) == 3
+
+
+# GET COIN BY ID V3
+def test_get_coins_by_id_v3_returns_completed(client, coin_with_duties):
+    response = client.get(f"/v3/coins/{coin_with_duties.id}")
+    data = response.json
+    assert response.status_code == 200
+    assert "completed" in data.keys()
+    assert isinstance(data["completed"], bool)

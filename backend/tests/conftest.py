@@ -1,7 +1,8 @@
 import pytest
 from pg_db_connection import database, TEST_DB
 from app import app as flask_app
-from models import Coin, Duty, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
+from werkzeug.security import generate_password_hash
+from models import Coin, Duty, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour, User, RequestLog
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -11,14 +12,16 @@ def use_test_db():
     
     TEST_DB.create_tables([
         Coin, Duty, Knowledge, Skill, Behaviour,
-        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
+        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
+        User, RequestLog
     ])
     
     yield  
     
     TEST_DB.drop_tables([
         Coin, Duty, Knowledge, Skill, Behaviour,
-        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
+        DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
+        User, RequestLog
     ])
     TEST_DB.close()
 
@@ -110,7 +113,7 @@ def ksbs():
 
 
 @pytest.fixture
-def duty_with_ksb(duties, ksbs):
+def duty_with_ksbs(duties, ksbs):
     duty = duties[0]
     knowledge, skill, behaviour = ksbs
 
@@ -118,7 +121,7 @@ def duty_with_ksb(duties, ksbs):
     DutySkill.get_or_create(duty=duty, skill=skill)
     DutyBehaviour.get_or_create(duty=duty, behaviour=behaviour)
 
-    return duty, knowledge, skill, behaviour
+    return duty
 
 
 @pytest.fixture
@@ -143,3 +146,43 @@ def ksbs_with_duties():
         "skill": skill,
         "behaviour": behaviour,
     }
+
+
+@pytest.fixture
+def create_admin_user():
+    admin = User.create(
+        username="admin",
+        password_hash=generate_password_hash("password123"),
+        role="admin"
+    )
+    yield admin
+
+
+@pytest.fixture
+def create_authenticated_user():
+    authenticated_user = User.create(
+        username="authenticated_user",
+        password_hash=generate_password_hash("password"),
+        role="authenticated_user"
+    )
+    yield authenticated_user
+
+@pytest.fixture
+def logged_in_admin(client, create_admin_user):
+    response = client.post("/login", json={
+        "username": create_admin_user.username,
+        "password": "password123"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    return client
+
+@pytest.fixture
+def logged_in_authenticated_user(client, create_authenticated_user):
+    response = client.post("/login", json={
+        "username": create_authenticated_user.username,
+        "password": "password"
+    }, follow_redirects=True)
+
+    assert response.status_code == 200
+    return client

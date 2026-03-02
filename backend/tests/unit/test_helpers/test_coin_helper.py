@@ -91,6 +91,55 @@ def test_create_coin_invalid_duty_code_raises_abort():
     assert "Duty with code 'FAKE DUTY CODE' does not exist" in str(e.value)
 
 
+def test_create_coin_with_completed_true():
+    data = {"name": "Completed Coin", "completed": True}
+    coin = CoinHelper.create_coin(data, with_duties=False)
+
+    assert coin.completed is True
+
+
+def test_create_coin_with_completed_false():
+    data = {"name": "Incomplete Coin", "completed": False}
+    coin = CoinHelper.create_coin(data, with_duties=False)
+
+    assert coin.completed is False
+
+
+def test_create_coin_invalid_completed_type_raises_abort():
+    data = {"name": "Bad Coin", "completed": "yes"}
+    with pytest.raises(HTTPException) as e:
+        CoinHelper.create_coin(data, with_duties=False)
+
+    assert "'completed' must be a boolean" in str(e.value)
+
+
+# TEST TOGGLE COMPLETE COIN
+def test_toggle_complete_coin_sets_flag():
+    coin = Coin.create(name="Test Coin")
+    assert coin.completed is False
+
+    result = CoinHelper.toggle_complete_coin(str(coin.id))
+    assert result is True
+
+    coin = Coin.get_by_id(coin.id)
+    assert coin.completed is True
+
+    result = CoinHelper.toggle_complete_coin(str(coin.id))
+    assert result is False
+
+
+def test_toggle_complete_coin_invalid_id():
+    with pytest.raises(HTTPException) as e:
+        CoinHelper.toggle_complete_coin("invalid-uuid")
+    assert "Invalid Coin ID format" in str(e.value)
+
+def test_toggle_complete_coin_nonexistent():
+    fake_id = "11111111-1111-1111-1111-111111111111"
+    with pytest.raises(HTTPException) as e:
+        CoinHelper.toggle_complete_coin(fake_id)
+    assert "Coin not found" in str(e.value)
+
+
 # TEST UPDATE COIN
 def test_update_coin_name_only(coin):
     updated = CoinHelper.update_coin(str(coin.id), {"name": "Updated Coin Name"})
@@ -105,6 +154,26 @@ def test_update_coin_missing_name_required(coin):
     with pytest.raises(HTTPException) as e:
         CoinHelper.update_coin(str(coin.id), {}, require_name=True)
     assert "Missing 'name' key" in str(e.value)
+
+
+def test_update_coin_sets_completed_true(coin):
+    updated = CoinHelper.update_coin(str(coin.id), {"completed": True})
+    assert updated.completed is True
+
+
+def test_update_coin_sets_completed_false(coin):
+    coin.completed = True
+    coin.save()
+
+    updated = CoinHelper.update_coin(str(coin.id), {"completed": False})
+    assert updated.completed is False
+
+
+def test_update_coin_invalid_completed_type_raises_abort(coin):
+    with pytest.raises(HTTPException) as e:
+        CoinHelper.update_coin(str(coin.id), {"completed": "nope"})
+
+    assert "'completed' must be a boolean" in str(e.value)
 
 
 # TEST DELETE COIN

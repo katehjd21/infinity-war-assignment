@@ -1,9 +1,9 @@
 from models import Duty, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour
 
 
-# PATCH DUTY
+# PATCH DUTY V1
 def test_patch_duty_updates_code(client, duty_with_coins):
-    response = client.patch(f"/duties/{duty_with_coins.code}", json={
+    response = client.patch(f"/v1/duties/{duty_with_coins.code}", json={
         "code": "D999"
     })
 
@@ -12,7 +12,7 @@ def test_patch_duty_updates_code(client, duty_with_coins):
 
 
 def test_patch_duty_updates_name(client, duty_with_coins):
-    response = client.patch(f"/duties/{duty_with_coins.code}", json={
+    response = client.patch(f"/v1/duties/{duty_with_coins.code}", json={
         "name": "Updated Duty Name"
     })
 
@@ -23,7 +23,7 @@ def test_patch_duty_updates_name(client, duty_with_coins):
 
 
 def test_patch_duty_updates_description(client, duty_with_coins):
-    response = client.patch(f"/duties/{duty_with_coins.code}", json={
+    response = client.patch(f"/v1/duties/{duty_with_coins.code}", json={
         "description": "Updated Duty Description"
     })
 
@@ -34,7 +34,7 @@ def test_patch_duty_updates_description(client, duty_with_coins):
 def test_patch_duty_updates_coins(client, duty_with_coins, coins):
     new_coin_ids = [coin.id for coin in coins]
 
-    response = client.patch(f"/duties/{duty_with_coins.code}", json={
+    response = client.patch(f"/v1/duties/{duty_with_coins.code}", json={
         "coin_ids": new_coin_ids
     })
 
@@ -54,7 +54,7 @@ def test_patch_duty_replaces_existing_coins(client, duty_with_coins, coins):
 
     new_coin_ids = [coins[0].id]
 
-    response = client.patch(f"/duties/{original_duty.code}", json={
+    response = client.patch(f"/v1/duties/{original_duty.code}", json={
         "coin_ids": new_coin_ids
     })
 
@@ -65,11 +65,12 @@ def test_patch_duty_replaces_existing_coins(client, duty_with_coins, coins):
     assert DutyCoin.select().where(DutyCoin.duty == duty).count() == 1
 
 
-def test_patch_duty_updates_ksbs(client, duty_with_ksb, ksbs):
-    duty, knowledge, skill, behaviour = duty_with_ksb
+def test_patch_duty_updates_ksbs(client, duty_with_ksbs, ksbs):
+    duty = duty_with_ksbs
+    knowledge, skill, behaviour = ksbs
     new_ksb_codes = [ksbs[0].code]
 
-    response = client.patch(f"/duties/{duty.code}", json={
+    response = client.patch(f"/v1/duties/{duty.code}", json={
         "ksb_codes": new_ksb_codes
     })
 
@@ -105,7 +106,7 @@ def test_patch_duty_updates_ksbs(client, duty_with_ksb, ksbs):
 
 
 def test_patch_duty_returns_404_if_not_found(client):
-    response = client.patch("/duties/D999", json={
+    response = client.patch("/v1/duties/D999", json={
         "name": "New Duty Name"
     })
 
@@ -114,9 +115,51 @@ def test_patch_duty_returns_404_if_not_found(client):
 
 
 def test_patch_duty_returns_400_if_invalid_format(client):
-    response = client.patch("/duties/INVALID", json={
+    response = client.patch("/v1/duties/INVALID", json={
         "name": "New Name"
     })
 
     assert response.status_code == 400
     assert "Invalid Duty Code format" in response.json["description"]
+
+
+# PATCH DUTY V2
+def test_admin_can_patch_duty(logged_in_admin, duty_with_ksbs, ksbs):
+    duty = duty_with_ksbs
+    knowledge, skill, behaviour = ksbs
+
+    response = logged_in_admin.patch(
+        f"/v2/duties/{duty.code}",
+        json={
+            "name": "Updated Duty Name",
+            "ksb_codes": [knowledge.code, skill.code, behaviour.code]
+        }
+    )
+
+    assert response.status_code == 200
+
+
+def test_unauthenticated_user_cannot_patch_duty(client, duty_with_ksbs, ksbs):
+    duty = duty_with_ksbs
+    knowledge, skill, behaviour = ksbs
+    response = client.patch(
+        f"/v2/duties/{duty.code}",
+        json={
+            "name": "Updated Duty Name",
+            "ksb_codes": [knowledge.code, skill.code, behaviour.code]
+        }
+    )
+    assert response.status_code == 401
+
+
+def test_authenticated_user_cannot_patch_duty(logged_in_authenticated_user, duty_with_ksbs, ksbs):
+    duty = duty_with_ksbs
+    knowledge, skill, behaviour = ksbs
+    response = logged_in_authenticated_user.patch(
+        f"/v2/duties/{duty.code}",
+        json={
+            "name": "Updated Duty Name",
+            "ksb_codes": [knowledge.code, skill.code, behaviour.code]
+        }
+    )
+    assert response.status_code == 403

@@ -122,3 +122,13 @@ def test_get_coins_returns_correct_duty_details_v2(client, coins_with_duties):
 
         for duty in returned_duties:
             assert duty in expected[coin_name]
+
+
+# GET COINS V3
+def test_get_coins_v3_returns_completed(client, coins):
+    response = client.get("/v3/coins")
+    data = response.json
+    assert response.status_code == 200
+    for coin_data in data:
+        assert "completed" in coin_data
+        assert isinstance(coin_data["completed"], bool)

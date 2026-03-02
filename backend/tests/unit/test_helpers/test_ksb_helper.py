@@ -30,8 +30,9 @@ def test_list_all_ksbs_returns_all_ksbs(ksbs):
 
 
 # TEST GET KSB BY CODE
-def test_get_ksb_by_code_returns_serialized_with_duties(duty_with_ksb):
-    duty, knowledge, skill, behaviour = duty_with_ksb
+def test_get_ksb_by_code_returns_serialized_with_duties(duty_with_ksbs, ksbs):
+    duty = duty_with_ksbs
+    knowledge, skill, behaviour = ksbs
 
     # Knowledge
     serialized = KsbHelper.get_ksb_by_code(knowledge.code)

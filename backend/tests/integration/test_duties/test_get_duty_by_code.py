@@ -66,8 +66,8 @@ def test_get_duty_by_code_returns_404_if_not_found(client):
     assert response.json["description"] == "Duty not found."
 
 
-def test_deleting_duty_cascades_all_ksb_junction_tables(duty_with_ksb):
-    duty, knowledge, skill, behaviour = duty_with_ksb
+def test_deleting_duty_cascades_all_ksb_junction_tables(duty_with_ksbs):
+    duty = duty_with_ksbs
 
     duty.delete_instance(recursive=True)
 

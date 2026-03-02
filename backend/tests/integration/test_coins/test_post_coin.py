@@ -131,3 +131,31 @@ def test_post_coin_returns_400_if_invalid_duty_code_v2(client):
 
     assert response.status_code == 400
     assert response.json["description"] == "Duty with code 'NON_EXISTENT_DUTY_CODE' does not exist."
+
+
+# POST COIN V3
+def test_admin_can_post_coin_with_completed(logged_in_admin):
+    response = logged_in_admin.post("/v3/coins", json={
+        "name": "Completed Coin",
+        "completed": True
+    })
+    data = response.json
+    assert response.status_code == 201
+    assert data["name"] == "Completed Coin"
+    assert data["completed"] is True
+
+
+def test_unauthenticated_user_cannot_post_coin_or_update_completion_status(client):
+    response = client.post("/v3/coins", json={
+        "name": "Completed Coin",
+        "completed": True
+    })
+    assert response.status_code == 401
+
+
+def test_authenticated_user_cannot_post_coin_or_update_completion_status(logged_in_authenticated_user):
+    response = logged_in_authenticated_user.post("/v3/coins", json={
+        "name": "Completed Coin",
+        "completed": True
+    })
+    assert response.status_code == 403

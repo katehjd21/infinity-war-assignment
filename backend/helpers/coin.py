@@ -48,13 +48,26 @@ class CoinHelper:
             abort(400, description="Missing 'name' key in request body.")
 
         name = cls.validate_coin_name(data["name"])
-        coin = Coin.create(name=name)
+
+        completed = data.get("completed", False)
+        if not isinstance(completed, bool):
+            abort(400, description="'completed' must be a boolean.")
+
+        coin = Coin.create(name=name, completed=completed)
 
         if with_duties:
             duty_codes = data.get("duty_codes", [])
             cls.attach_duties(coin, duty_codes)
 
         return coin
+    
+
+    @classmethod
+    def toggle_complete_coin(cls, coin_id: str):
+        coin = cls.get_coin_by_id(coin_id)
+        coin.completed = not coin.completed
+        coin.save()
+        return coin.completed
 
 
     @classmethod
@@ -82,6 +95,11 @@ class CoinHelper:
         if "duty_codes" in data:
             DutyCoin.delete().where(DutyCoin.coin == coin).execute()
             cls.attach_duties(coin, data["duty_codes"])
+
+        if "completed" in data:
+            if not isinstance(data["completed"], bool):
+                abort(400, description="'completed' must be a boolean.")
+            coin.completed = data["completed"]
 
         coin.save()
         return coin

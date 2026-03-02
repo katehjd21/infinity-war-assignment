@@ -1,19 +1,25 @@
 {
   "GET /v1/coins": {
-    "description": "Retrieves a list of all coins with their id and name.",
-    "exampleResponse": [
-      {
-        "id": "uuid-of-coin",
-        "name": "Example Coin"
-      }
-    ]
-  },
-  "GET /v2/coins": {
-    "description": "Retrieves a list of all coins along with the duties associated with each coin.",
+    "description": "Retrieves a list of all coins with their id, name and completed status.",
     "exampleResponse": [
       {
         "id": "uuid-of-coin",
         "name": "Example Coin",
+        "completed": false
+      }
+    ],
+    "errors": [
+      { "code": 400, "description": "Bad request (e.g., malformed query)." }
+    ]
+  },
+
+  "GET /v2/coins": {
+    "description": "Retrieves all coins with associated duties.",
+    "exampleResponse": [
+      {
+        "id": "uuid-of-coin",
+        "name": "Example Coin",
+        "completed": false,
         "duties": [
           {
             "id": "uuid-of-duty",
@@ -23,180 +29,335 @@
           }
         ]
       }
+    ],
+    "errors": [
+      { "code": 400, "description": "Bad request (e.g., malformed query)." }
     ]
   },
-  "GET /v1/coins/:coin_id": {
-    "description": "Retrieves a single coin by its UUID with id and name.",
-    "exampleResponse": {
-      "id": "uuid-of-coin",
-      "name": "Example Coin"
-    }
+
+  "GET /v3/coins": {
+    "description": "Retrieves all coins with duties and includes completion state.",
+    "authentication": "Optional (completion visibility depends on user)",
+    "exampleResponse": [
+      {
+        "id": "uuid-of-coin",
+        "name": "Example Coin",
+        "completed": true,
+        "duties": []
+      }
+    ],
+    "errors": [
+      { "code": 400, "description": "Bad request (e.g., malformed query)." },
+      { "code": 401, "description": "Authentication required for completion visibility." }
+    ]
   },
-  "GET /v2/coins/:coin_id": {
-    "description": "Retrieves a single coin by its UUID along with associated duties.",
+
+  "GET /v1/coins/:coin_id": {
+    "description": "Retrieves a single coin by UUID.",
     "exampleResponse": {
       "id": "uuid-of-coin",
       "name": "Example Coin",
-      "duties": [
-        {
-          "id": "uuid-of-duty",
-          "code": "D1",
-          "name": "Duty 1 Name",
-          "description": "Duty 1 Description"
-        }
-      ]
-    }
+      "completed": false
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
+      { "code": 404, "description": "Coin not found." }
+    ]
   },
+
+  "GET /v2/coins/:coin_id": {
+    "description": "Retrieves a coin with associated duties.",
+    "exampleResponse": {
+      "id": "uuid-of-coin",
+      "name": "Example Coin",
+      "completed": false,
+      "duties": []
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
+      { "code": 404, "description": "Coin not found." }
+    ]
+  },
+
+  "GET /v3/coins/:coin_id": {
+    "description": "Retrieves a coin with duties and completion state.",
+    "exampleResponse": {
+      "id": "uuid-of-coin",
+      "name": "Example Coin",
+      "completed": true,
+      "duties": []
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
+      { "code": 401, "description": "Authentication required for completion visibility." },
+      { "code": 404, "description": "Coin not found." }
+    ]
+  },
+
   "POST /v1/coins": {
-    "description": "Creates a new coin with a name only.",
+    "description": "Creates a new coin (name required).",
     "requestBody": {
-      "name": "Example Coin"
+      "name": "Example Coin",
+      "completed": false
     },
     "exampleResponse": {
       "id": "uuid-of-new-coin",
-      "name": "Example Coin"
-    }
+      "name": "Example Coin",
+      "completed": false
+    },
+    "errors": [
+      { "code": 400, "description": "Missing 'name' or invalid 'completed' value." }
+    ]
   },
+
   "POST /v2/coins": {
-    "description": "Creates a new coin and optionally associates duties using duty_codes.",
+    "description": "Creates a new coin and optionally associates duties.",
     "requestBody": {
       "name": "Example Coin",
+      "completed": false,
       "duty_codes": ["D1", "D2"]
     },
     "exampleResponse": {
       "id": "uuid-of-coin",
       "name": "Example Coin",
-      "duties": [
-        {
-          "id": "uuid-of-duty",
-          "code": "D1",
-          "name": "Duty 1 Name",
-          "description": "Duty 1 Description"
-        },
-        {
-          "id": "uuid-of-duty",
-          "code": "D2",
-          "name": "Duty 2 Name",
-          "description": "Duty 2 Description"
-        }
-      ]
-    }
+      "completed": false,
+      "duties": []
+    },
+    "errors": [
+      { "code": 400, "description": "Missing 'name', invalid 'completed', or invalid duty_codes." }
+    ]
   },
+
+  "POST /v3/coins": {
+    "description": "Admin only. Creates a coin with duties and completion support.",
+    "authentication": "Admin required",
+    "requestBody": {
+      "name": "Example Coin",
+      "completed": false,
+      "duty_codes": ["D1"]
+    },
+    "exampleResponse": {
+      "id": "uuid-of-coin",
+      "name": "Example Coin",
+      "completed": false,
+      "duties": []
+    },
+    "errors": [
+      { "code": 400, "description": "Missing 'name', invalid 'completed', or invalid duty_codes." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." }
+    ]
+  },
+
+  "POST /coins/:coin_id/complete": {
+    "description": "Toggles completion status for a coin.",
+    "authentication": "Login required",
+    "exampleResponse": {
+      "message": "Coin completion toggled",
+      "completed": true
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 404, "description": "Coin not found." }
+    ]
+  },
+
   "PATCH /v1/coins/:coin_id": {
-    "description": "Updates the name of a coin by UUID.",
+    "description": "Updates coin name (name required).",
     "requestBody": {
       "name": "Updated Coin Name"
     },
     "exampleResponse": {
       "id": "uuid-of-coin",
-      "name": "Updated Coin Name"
-    }
+      "name": "Updated Coin Name",
+      "completed": false
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format, missing 'name', or invalid 'completed' value." },
+      { "code": 404, "description": "Coin not found." }
+    ]
   },
+
   "PATCH /v2/coins/:coin_id": {
-    "description": "Updates the name and/or associated duties of a coin.",
+    "description": "Updates name, duties and/or completion state.",
     "requestBody": {
       "name": "Updated Coin Name",
-      "duty_codes": ["D1", "D3"]
+      "duty_codes": ["D1"],
+      "completed": true
     },
     "exampleResponse": {
       "id": "uuid-of-coin",
       "name": "Updated Coin Name",
-      "duties": [
-        {
-          "id": "uuid-of-duty",
-          "code": "D1",
-          "name": "Duty 1 Name",
-          "description": "Duty 1 Description"
-        },
-        {
-          "id": "uuid-of-duty",
-          "code": "D3",
-          "name": "Duty 3 Name",
-          "description": "Duty 3 Description"
-        }
-      ]
-    }
+      "completed": true,
+      "duties": []
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format, invalid body, or invalid duty_codes." },
+      { "code": 404, "description": "Coin not found." }
+    ]
   },
-  "DELETE /coins/:coin_id": {
-    "description": "Deletes a coin by UUID. Returns a 200 OK with a success message on successful deletion.",
+
+  "PATCH /v3/coins/:coin_id": {
+    "description": "Admin only update of coin.",
+    "authentication": "Admin required",
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format, invalid body, or invalid duty_codes." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." },
+      { "code": 404, "description": "Coin not found." }
+    ]
+  },
+
+  "DELETE /v1/coins/:coin_id": {
+    "description": "Deletes a coin by UUID.",
     "exampleResponse": {
       "message": "Coin has been successfully deleted!"
-    }
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format." },
+      { "code": 404, "description": "Coin not found." }
+    ]
   },
+
+  "DELETE /v2/coins/:coin_id": {
+    "description": "Admin only deletion of coin.",
+    "authentication": "Admin required",
+    "exampleResponse": {
+      "message": "Coin has been successfully deleted!"
+    },
+    "errors": [
+      { "code": 400, "description": "Invalid Coin ID format." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." },
+      { "code": 404, "description": "Coin not found." }
+    ]
+  },
+
   "GET /duties": {
-    "description": "Retrieves a list of all duties.",
-    "exampleResponse": [
-      {
-        "id": "uuid-of-duty",
-        "code": "D1",
-        "name": "Duty 1 Name",
-        "description": "Duty 1 Description"
-      }
+    "description": "Retrieves all duties.",
+    "errors": [
+      { "code": 400, "description": "Bad request." }
     ]
   },
+
   "GET /duties/:duty_code": {
-    "description": "Retrieves a single duty by code along with coins associated with it.",
-    "exampleResponse": {
-      "id": "uuid-of-duty",
-      "code": "D1",
-      "name": "Duty 1 Name",
-      "description": "Duty 1 Description",
-      "coins": [
-        {
-          "id": "uuid-of-coin",
-          "name": "Example Coin"
-        }
-      ]
-    }
-  },
-  "GET /ksbs": {
-    "description": "Retrieves a list of all KSBs (Knowledge, Skill, Behaviour).",
-    "exampleResponse": [
-      {
-        "id": "uuid-of-ksb",
-        "code": "K1",
-        "name": "Knowledge 1 Name",
-        "description": "Knowledge 1 Description",
-        "type": "Knowledge"
-      },
-      {
-        "id": "uuid-of-ksb",
-        "code": "S1",
-        "name": "Skill 1 Name",
-        "description": "Skill 1 Description",
-        "type": "Skill"
-      },
-      {
-        "id": "uuid-of-ksb",
-        "code": "B1",
-        "name": "Behaviour 1 Name",
-        "description": "Behaviour 1 Description",
-        "type": "Behaviour"
-      }
+    "description": "Retrieves a duty with associated coins and KSBs.",
+    "errors": [
+      { "code": 400, "description": "Invalid Duty Code format." },
+      { "code": 404, "description": "Duty not found." }
     ]
   },
+
+  "POST /v1/duties": {
+    "description": "Creates a duty.",
+    "requestBody": {
+      "code": "D10",
+      "name": "New Duty",
+      "description": "Duty description",
+      "coin_ids": ["uuid-of-coin"],
+      "ksb_codes": ["K1", "S1", "B1"]
+    },
+    "errors": [
+      { "code": 400, "description": "Missing required fields, invalid coin_ids or ksb_codes." }
+    ]
+  },
+
+  "POST /v2/duties": {
+    "description": "Admin only duty creation.",
+    "authentication": "Admin required",
+    "errors": [
+      { "code": 400, "description": "Missing required fields, invalid coin_ids or ksb_codes." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." }
+    ]
+  },
+
+  "PATCH /v1/duties/:duty_code": {
+    "description": "Updates a duty including coins and KSB associations.",
+    "errors": [
+      { "code": 400, "description": "Invalid Duty Code format or invalid body." },
+      { "code": 404, "description": "Duty not found." }
+    ]
+  },
+
+  "PATCH /v2/duties/:duty_code": {
+    "description": "Admin only duty update.",
+    "authentication": "Admin required",
+    "errors": [
+      { "code": 400, "description": "Invalid Duty Code format or invalid body." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." },
+      { "code": 404, "description": "Duty not found." }
+    ]
+  },
+
+  "DELETE /v1/duties/:duty_code": {
+    "description": "Deletes a duty.",
+    "errors": [
+      { "code": 400, "description": "Invalid Duty Code format." },
+      { "code": 404, "description": "Duty not found." }
+    ]
+  },
+
+  "DELETE /v2/duties/:duty_code": {
+    "description": "Admin only duty deletion.",
+    "authentication": "Admin required",
+    "errors": [
+      { "code": 400, "description": "Invalid Duty Code format." },
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." },
+      { "code": 404, "description": "Duty not found." }
+    ]
+  },
+
+  "GET /ksbs": {
+    "description": "Retrieves all KSBs.",
+    "errors": [
+      { "code": 400, "description": "Bad request." }
+    ]
+  },
+
   "GET /ksbs/:ksb_code": {
-    "description": "Retrieves a single KSB by code along with associated duties.",
+    "description": "Retrieves a KSB with associated duties.",
+    "errors": [
+      { "code": 400, "description": "Invalid KSB Code format." },
+      { "code": 404, "description": "KSB not found." }
+    ]
+  },
+
+  "POST /login": {
+    "description": "Logs in a user.",
+    "requestBody": {
+      "username": "admin",
+      "password": "password"
+    },
     "exampleResponse": {
-      "id": "uuid-of-ksb",
-      "code": "K1",
-      "name": "Knowledge 1 Name",
-      "description": "Knowledge 1 Description",
-      "type": "Knowledge",
-      "duties": [
-        {
-          "id": "uuid-of-duty",
-          "code": "D1",
-          "name": "Duty 1 Name",
-          "description": "Duty 1 Description"
-        },
-        {
-          "id": "uuid-of-duty",
-          "code": "D2",
-          "name": "Duty 2 Name",
-          "description": "Duty 2 Description"
-        }
-      ]
-    }
+      "message": "Login successful",
+      "role": "admin"
+    },
+    "errors": [
+      { "code": 401, "description": "Invalid credentials." },
+      { "code": 400, "description": "Missing username or password." }
+    ]
+  },
+
+  "POST /logout": {
+    "description": "Logs out current user.",
+    "exampleResponse": {
+      "message": "Logged out"
+    },
+    "errors": [
+      { "code": 401, "description": "User not logged in." }
+    ]
+  },
+
+  "GET /admin/logs": {
+    "description": "Returns the 100 most recent request logs.",
+    "authentication": "Admin required",
+    "errors": [
+      { "code": 401, "description": "Authentication required." },
+      { "code": 403, "description": "Admin privileges required." }
+    ]
   }
 }
