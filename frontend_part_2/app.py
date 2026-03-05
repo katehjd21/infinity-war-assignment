@@ -1,10 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect
 from controllers.duty_controller import DutyController
 from controllers.coin_controller import CoinController
+from api_session import api_session
 from models.coin import Coin
 from utils.utils import load_fixture
+import requests
+import secrets
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
 
 
 @app.route('/')
@@ -37,12 +41,35 @@ def coin_page(coin_id):
         else:
             coin = None
     else:
-        coin = CoinController.fetch_coin_by_id(coin_id)
+        coin = CoinController().fetch_coin_by_id(coin_id)
 
     if not coin:
         return "Coin not found", 404
 
     return render_template("single_coin.html", coin=coin)
+
+
+@app.route("/toggle_coin_complete", methods=["POST"])
+def toggle_coin_complete():
+    print("Toggle route hit")
+
+    if not session.get("username"):
+        print("No session user")
+        return "Unauthorized", 401
+
+    coin_id = request.form.get("coin_id")
+    print("Coin ID:", coin_id)
+
+    try:
+        response = api_session.post(f"http://localhost:5000/coins/{coin_id}/complete")
+        print("Backend status:", response.status_code)
+        print("Backend response:", response.text)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print("Error toggling:", e)
+        return "Server error", 500
+
+    return redirect(request.referrer or "/")
 
 
 @app.route("/duties/<duty_code>")
@@ -66,6 +93,55 @@ def duty_page(duty_code):
 
     return render_template("duty_detail.html", duty=duty, coin_id=coin_id)
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login_page():
+    if request.method == "POST":
+        username = request.form.get("username").strip()
+        password = request.form.get("password").strip()
+
+        try:
+            response = api_session.post(
+                "http://localhost:5000/login",
+                json={"username": username, "password": password},
+                timeout=5
+            )
+            data = response.json()
+            if response.status_code != 200:
+                return render_template("login.html", error=data.get("error", "Invalid credentials"))
+
+            session["role"] = data.get("role")
+            session["username"] = username
+            return redirect("/")
+        except requests.RequestException:
+            return render_template("login.html", error="Server error. Try again later.")
+
+    return render_template("login.html")
+
+
+@app.route("/logout", methods=["POST"])
+def logout_page():
+    api_session.post("http://localhost:5000/logout")
+    session.clear()
+    return redirect("/")
+
+
+@app.route("/admin/logs")
+def admin_logs_page():
+    if session.get("role") != "admin":
+        return "Unauthorized", 401
+
+    try:
+        response = requests.get(
+            "http://localhost:5000/admin/logs",
+            timeout=5
+        )
+        response.raise_for_status()
+        logs = response.json()
+    except requests.RequestException:
+        logs = []
+    
+    return render_template("admin_logs.html", logs=logs)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

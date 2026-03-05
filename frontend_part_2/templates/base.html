@@ -7,6 +7,25 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
+    <header>
+        <div class="header-container">
+            <a href="{{ url_for('landing_page') }}" class="logo">💰 Coins</a>
+            <nav>
+                {% if session.get('username') %}
+                    <span>Logged in as {{ session.username }} ({{ session.role }})</span>
+                    <form method="POST" action="{{ url_for('logout_page') }}" style="display:inline;">
+                        <button type="submit">Logout</button>
+                    </form>
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('admin_logs_page') }}">Admin Logs</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('login_page') }}">Login</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
     <div class="page-container">
         {% block content %}{% endblock %}
     </div>

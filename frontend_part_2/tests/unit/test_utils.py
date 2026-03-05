@@ -17,7 +17,7 @@ def test_load_fixture_returns_data():
         json.dump(sample_data, f)
 
     try:
-        result = load_fixture(fixture_name)
+        result = load_fixture(fixture_name, folder="utils/fixtures")
         assert result == sample_data
     finally:
         os.remove(fixture_path)

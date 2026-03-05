@@ -1,4 +1,4 @@
-/* Reset & base */
+Reset & base
 * {
     margin: 0;
     padding: 0;
@@ -18,7 +18,46 @@ body {
     padding: 60px 24px;
 }
 
-/* Headings */
+
+header {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+}
+
+header .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+header nav a, 
+header nav button {
+    margin-left: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+header nav form {
+    display: inline;
+}
+
+header .logo {
+    font-weight: 700;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 1.4rem;
+}
+
 h1 {
     font-size: 2.8rem;
     font-weight: 700;
@@ -32,6 +71,13 @@ h2 {
     margin-bottom: 20px;
     margin-top: 40px;
     color: #334155;
+}
+
+/* Landing Page */
+
+.landing-page .grid,
+.landing-page .card {
+    margin-bottom: 50px;
 }
 
 .grid {
@@ -67,7 +113,6 @@ h2 {
     text-decoration: underline;
 }
 
-/* Description boxes */
 .description-box {
     background: white;
     padding: 30px;
@@ -78,7 +123,98 @@ h2 {
     margin-bottom: 40px;
 }
 
-/* Muted / empty state messages */
+
+/* Single coin page */
+.single-coin-page .back-link {
+    margin-top: 30px;
+}
+
+.completion-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.single-coin-page .completion-form {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.single-coin-page .completion-form button {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.single-coin-page .completion-form button {
+    background: #2563eb;
+    color: white;
+}
+
+.single-coin-page .completion-form button:hover {
+    background: #1d4ed8;
+}
+
+.single-coin-page .completion-form button.complete {
+    background: #16a34a;
+    color: white;
+}
+
+.single-coin-page .completion-form button.complete:hover {
+    background: #15803d;
+}
+
+.single-coin-page .completion-form button.incomplete {
+    background: #2563eb;
+    color: white;
+}
+
+.single-coin-page .completion-form button.incomplete:hover {
+    background: #1d4ed8;
+}
+
+.completion-badge {
+    margin: 15px auto 25px auto;
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.completion-badge.complete {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.completion-badge.incomplete {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+
+/* Duty detail page */
+.duty-detail-page {
+    max-width: 800px;
+    margin: auto;
+}
+
+.duty-detail-page .grid {
+    margin-bottom: 40px;
+}
+
+.duty-detail-page .card {
+    padding: 20px;
+}
+
+.duty-detail-page .button-row {
+    margin-top: 40px;
+}
+
+
+/* Muted and empty state messages */
 .muted,
 .no-coins-message,
 .no-duties-message {
@@ -89,7 +225,8 @@ h2 {
     font-weight: 500;
 }
 
-/* Buttons row */
+
+/* Back links and buttons */
 .button-row {
     margin-top: 50px;
     display: flex;
@@ -98,7 +235,6 @@ h2 {
     flex-wrap: wrap;
 }
 
-/* Back links / buttons */
 .back-link {
     display: inline-block;
     margin-top: 50px;
@@ -141,35 +277,4 @@ h2 {
 .back-button.secondary:hover {
     background: #2563eb;
     color: white;
-}
-
-/* Page-specific wrappers for scoping */
-
-/* Landing page */
-.landing-page .grid,
-.landing-page .card {
-    margin-bottom: 50px;
-}
-
-/* Single coin page */
-.single-coin-page .back-link {
-    margin-top: 30px;
-}
-
-/* Duty detail page */
-.duty-detail-page {
-    max-width: 800px;
-    margin: auto;
-}
-
-.duty-detail-page .grid {
-    margin-bottom: 40px;
-}
-
-.duty-detail-page .card {
-    padding: 20px;
-}
-
-.duty-detail-page .button-row {
-    margin-top: 40px;
 }

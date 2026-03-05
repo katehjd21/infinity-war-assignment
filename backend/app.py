@@ -206,13 +206,12 @@ def get_ksb_by_code(ksb_code):
 @app.post("/login")
 def login():
     data = request.json
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
 
     user = User.get_or_none(User.username == username)
-
     if not user or not user.check_password(password):
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "Invalid username or password"}), 401
 
     session["user_id"] = str(user.id)
     session["role"] = user.role

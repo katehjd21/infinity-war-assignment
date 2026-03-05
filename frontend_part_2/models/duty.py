@@ -1,4 +1,6 @@
 import requests
+from api_session import api_session
+
 
 class Duty:
     def __init__(self, code, name, description, coins=None):
@@ -10,7 +12,7 @@ class Duty:
     @classmethod
     def fetch_duty_from_backend(cls, duty_code):
         try:
-            response = requests.get(f"http://localhost:5000/duties/{duty_code}")
+            response = api_session.get(f"http://localhost:5000/duties/{duty_code}")
             response.raise_for_status()
             data = response.json()
             return cls(

@@ -1,4 +1,4 @@
-def test_duty_detail_page_get(mocker, client, mocked_duty):
+def test_duty_detail_page_shows_duty_information_with_coins(mocker, client, mocked_duty):
     mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=mocked_duty)
 
     response = client.get(f'/duties/{mocked_duty.code}')
@@ -11,6 +11,18 @@ def test_duty_detail_page_get(mocker, client, mocked_duty):
 
     for coin in mocked_duty.coins:
         assert coin["name"] in html
+
+
+def test_duty_detail_shows_message_if_no_coins(mocker, client, mocked_duty):
+    duty_no_coins = mocked_duty
+    duty_no_coins.coins = []
+    mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=duty_no_coins)
+
+    response = client.get(f"/duties/{duty_no_coins.code}")
+    html = response.data.decode()
+
+    assert response.status_code == 200
+    assert "No coins associated with this duty." in html
 
 
 def test_duty_detail_page_not_found(mocker, client):
@@ -45,4 +57,4 @@ def test_duty_detail_page_no_coin_link_if_not_passed(mocker, client, mocked_duty
 
     assert response.status_code == 200
     assert "Back to coin" not in html
-    assert 'href="/"' in html  
+    assert 'href="/"' in html

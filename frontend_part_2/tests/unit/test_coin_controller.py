@@ -5,6 +5,15 @@ from controllers.coin_controller import CoinController
 def coin_controller():
     return CoinController()
 
+
+def test_coin_controller_calls_model_method(mocker, coin_controller, mocked_coins):
+    mock_model = mocker.patch("models.coin.Coin.fetch_coins_from_backend", return_value=mocked_coins)
+    coin_controller.fetch_all_coins()
+    
+    assert mock_model.call_count == 1
+    
+
+# FETCH ALL COINS
 def test_coin_controller_can_fetch_all_coins(mocker, coin_controller, mocked_coins):
     mocker.patch("models.coin.Coin.fetch_coins_from_backend", return_value=mocked_coins)
     fetched_coins = coin_controller.fetch_all_coins()
@@ -19,6 +28,14 @@ def test_coin_controller_fetch_all_coins_returns_empty_if_no_coins(mocker, coin_
     assert fetched_coins == []
 
 
+def test_coin_controller_fetch_all_coins_handles_exception(mocker, coin_controller):
+    mocker.patch("models.coin.Coin.fetch_coins_from_backend", side_effect=Exception("Network Error")) 
+    coins = coin_controller.fetch_all_coins()
+    
+    assert coins == []
+
+
+# FETCH COIN BY ID
 def test_coin_controller_can_fetch_coin_by_id(mocker, coin_controller, mocked_coin):
     mocker.patch("models.coin.Coin.fetch_coin_from_backend_by_id",  return_value=mocked_coin)
     fetched_coin = coin_controller.fetch_coin_by_id("11111111-1111-1111-1111-111111111111")
@@ -40,8 +57,8 @@ def test_coin_controller_fetch_coin_by_id_coin_not_found(mocker, coin_controller
     assert fetched_coin is None
 
 
-def test_coin_controller_calls_model_method(mocker, coin_controller, mocked_coins):
-    mock_model = mocker.patch("models.coin.Coin.fetch_coins_from_backend", return_value=mocked_coins)
-    coin_controller.fetch_all_coins()
+def test_coin_controller_fetch_coin_by_id_handles_exception(mocker, coin_controller):
+    mocker.patch("models.coin.Coin.fetch_coin_from_backend_by_id", side_effect=Exception("Network Error"))
+    coin = coin_controller.fetch_coin_by_id("some-id")
     
-    assert mock_model.call_count == 1
+    assert coin is None

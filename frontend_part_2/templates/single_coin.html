@@ -2,12 +2,39 @@
 {% block content %}
 <div class="single-coin-page">
     <h1>{{ coin.name }}</h1>
+
+    <div class="completion-section">
+        {% if coin.completed %}
+            <div class="completion-badge complete">
+                ✓ Coin Completed
+            </div>
+        {% else %}
+            <div class="completion-badge incomplete">
+                ⏳ In Progress
+            </div>
+        {% endif %}
+
+        {% if session.get('username') %}
+            <form method="POST" action="{{ url_for('toggle_coin_complete') }}" class="completion-form">
+                <input type="hidden" name="coin_id" value="{{ coin.id }}">
+                <button type="submit"
+                    class="{% if coin.completed %}complete{% else %}incomplete{% endif %}">
+                    {% if coin.completed %}
+                        Mark Incomplete
+                    {% else %}
+                        Mark Complete
+                    {% endif %}
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
     {% if coin.duties %}
         <h2>Related Duties</h2>
         <div class="grid">
             {% for duty in coin.duties %}
             <div class="card">
-                <a href="{{ url_for('duty_page', duty_code=duty['code'], coin_id=coin.id, testing=request.args.get('testing'), fixture=request.args.get('fixture')) }}">
+                <a href="{{ url_for('duty_page', duty_code=duty['code'], coin_id=coin.id) }}">
                     {{ duty['code'] }} - {{ duty['name'] }}
                 </a>
             </div>
@@ -16,7 +43,8 @@
     {% else %}
         <p class="no-duties-message muted">No duties associated with this coin.</p>
     {% endif %}
-    <a class="back-link" href="{{ url_for('landing_page', testing=request.args.get('testing'), fixture=request.args.get('fixture')) }}">
+
+    <a class="back-link" href="{{ url_for('landing_page') }}">
         Back to all coins
     </a>
 </div>

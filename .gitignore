@@ -24,3 +24,6 @@ node_modules/
 .terraform/
 
 seed_db.py
+create_users.py
+create_tables.py
+reset_tables.py
