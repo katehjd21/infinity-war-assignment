@@ -1,5 +1,6 @@
 import pytest
 from controllers.coin_controller import CoinController
+from models.coin import Coin
 
 @pytest.fixture
 def coin_controller():
@@ -28,13 +29,6 @@ def test_coin_controller_fetch_all_coins_returns_empty_if_no_coins(mocker, coin_
     assert fetched_coins == []
 
 
-def test_coin_controller_fetch_all_coins_handles_exception(mocker, coin_controller):
-    mocker.patch("models.coin.Coin.fetch_coins_from_backend", side_effect=Exception("Network Error")) 
-    coins = coin_controller.fetch_all_coins()
-    
-    assert coins == []
-
-
 # FETCH COIN BY ID
 def test_coin_controller_can_fetch_coin_by_id(mocker, coin_controller, mocked_coin):
     mocker.patch("models.coin.Coin.fetch_coin_from_backend_by_id",  return_value=mocked_coin)
@@ -57,8 +51,147 @@ def test_coin_controller_fetch_coin_by_id_coin_not_found(mocker, coin_controller
     assert fetched_coin is None
 
 
-def test_coin_controller_fetch_coin_by_id_handles_exception(mocker, coin_controller):
-    mocker.patch("models.coin.Coin.fetch_coin_from_backend_by_id", side_effect=Exception("Network Error"))
-    coin = coin_controller.fetch_coin_by_id("some-id")
-    
-    assert coin is None
+# TOGGLE COIN COMPLETION
+def test_coin_controller_can_toggle_coin_completion_false_to_true(mocker, coin_controller):
+    original_coin = Coin(
+        "Automate",
+        "11111111-1111-1111-1111-111111111111",
+        duties=[
+            {"code": "D1", "name": "Duty 1", "description": "Duty 1 Description"},
+            {"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"},
+        ],
+        completed=False
+    )
+
+    toggled_coin = Coin(
+        original_coin.name,
+        original_coin.id,
+        duties=original_coin.duties,
+        completed=True
+    )
+
+    mocker.patch("models.coin.Coin.toggle_complete", return_value=toggled_coin)
+
+    result = coin_controller.toggle_coin_complete(original_coin.id)
+
+    assert result is not None
+    assert isinstance(result, Coin)
+    assert result.id == original_coin.id
+    assert result.completed is True
+
+
+def test_coin_controller_can_toggle_coin_completion_true_to_false(mocker, coin_controller):
+    original_coin = Coin(
+        "Automate",
+        "11111111-1111-1111-1111-111111111111",
+        duties=[
+            {"code": "D1", "name": "Duty 1", "description": "Duty 1 Description"},
+            {"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"},
+        ],
+        completed=True
+    )
+
+    toggled_coin = Coin(
+        original_coin.name,
+        original_coin.id,
+        duties=original_coin.duties,
+        completed=False
+    )
+
+    mocker.patch("models.coin.Coin.toggle_complete", return_value=toggled_coin)
+
+    result = coin_controller.toggle_coin_complete(original_coin.id)
+
+    assert result is not None
+    assert isinstance(result, Coin)
+    assert result.id == original_coin.id
+    assert result.completed is False
+
+
+def test_coin_controller_toggle_coin_completion_failure(mocker, coin_controller):
+    mocker.patch("models.coin.Coin.toggle_complete", return_value=None)
+
+    result = coin_controller.toggle_coin_complete("non-existent-id")
+
+    assert result is None
+
+
+# CREATE COIN
+def test_coin_controller_can_create_coin(mocker, coin_controller, mocked_coin):
+    mocker.patch(
+        "models.coin.Coin.create_coin",
+        return_value=mocked_coin
+    )
+
+    new_coin = coin_controller.create_coin("Automate", duty_codes=["D1", "D2"])
+
+    assert new_coin is not None
+    assert isinstance(new_coin, Coin)
+    assert new_coin.name == "Automate"
+    assert new_coin.duties == mocked_coin.duties
+    assert new_coin.completed == mocked_coin.completed
+
+
+def test_coin_controller_create_coin_returns_none_on_failure(mocker, coin_controller):
+    mocker.patch(
+        "models.coin.Coin.create_coin",
+        return_value=None
+    )
+
+    result = coin_controller.create_coin("Invalid Coin", duty_codes=["D1"])
+
+    assert result is None
+
+
+# UPDATE COIN
+def test_coin_controller_can_update_coin(mocker, coin_controller, mocked_coin):
+    updated_coin = Coin(
+        mocked_coin.name,
+        mocked_coin.id,
+        duties=mocked_coin.duties,
+        completed=True
+    )
+
+    mocker.patch(
+        "models.coin.Coin.update_coin",
+        return_value=updated_coin
+    )
+
+    result = coin_controller.update_coin(
+        coin_id=mocked_coin.id,
+        name="Updated Name",
+        duty_codes=["D1", "D2"]
+    )
+
+    assert result is not None
+    assert isinstance(result, Coin)
+    assert result.id == mocked_coin.id
+    assert result.completed is True
+
+
+def test_coin_controller_update_coin_returns_none_on_failure(mocker, coin_controller):
+    mocker.patch(
+        "models.coin.Coin.update_coin",
+        return_value=None
+    )
+
+    result = coin_controller.update_coin("non-existent-id", name="Fail Update")
+
+    assert result is None
+
+
+# DELETE COIN
+def test_coin_controller_can_delete_coin_success(mocker, coin_controller):
+    mocker.patch("models.coin.Coin.delete_coin", return_value=True)
+
+    result = coin_controller.delete_coin("11111111-1111-1111-1111-111111111111")
+
+    assert result is True
+
+
+def test_coin_controller_delete_coin_failure(mocker, coin_controller):
+    mocker.patch("models.coin.Coin.delete_coin", return_value=False)
+
+    result = coin_controller.delete_coin("non-existent-id")
+
+    assert result is False

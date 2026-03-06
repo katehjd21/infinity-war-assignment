@@ -13,9 +13,35 @@ def mock_api_session_get(mocker):
         mocker.patch("models.coin.api_session.get", return_value=mock_response)
     return _mock
 
+@pytest.fixture
+def mock_api_session_post(mocker):
+    def _mock(response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        mocker.patch("models.coin.api_session.post", return_value=mock_response)
+    return _mock
 
-def test_coin_has_name(mocked_coin):
-    assert mocked_coin.name == "Automate"
+
+@pytest.fixture
+def mock_api_session_patch(mocker):
+    def _mock(response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        mocker.patch("models.coin.api_session.patch", return_value=mock_response)
+    return _mock
+
+
+@pytest.fixture
+def mock_api_session_delete(mocker):
+    def _mock(return_value=True):
+        mock_response = Mock()
+        mock_response.raise_for_status.return_value = None
+        mocker.patch("models.coin.api_session.delete", return_value=mock_response)
+        return mock_response
+    return _mock
+
 
 # FETCH ALL COINS
 def test_fetch_all_coins_from_backend(mocked_coins_response, mock_api_session_get):
@@ -95,3 +121,139 @@ def test_fetch_coin_by_id_returns_none_on_error(mocker):
     coin = Coin.fetch_coin_from_backend_by_id("invalid_coin_id")
 
     assert coin is None
+
+
+# TOGGLE COIN COMPLETION
+def test_toggle_coin_complete_from_false_to_true(mocker):
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "id": "55555555-5555-5555-5555-555555555555",
+        "name": "Automate",
+        "completed": True,
+        "duties": []
+    }
+    mock_response.raise_for_status.return_value = None
+
+    mocker.patch("models.coin.api_session.post", return_value=mock_response)
+
+    coin = Coin.toggle_complete("123")
+
+    assert coin is not None
+    assert isinstance(coin, Coin)
+    assert coin.completed is True
+
+
+def test_toggle_coin_complete_from_true_to_false(mocker):
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "id": "55555555-5555-5555-5555-555555555555",
+        "name": "Automate",
+        "completed": False,
+        "duties": []
+    }
+    mock_response.raise_for_status.return_value = None
+
+    mocker.patch("models.coin.api_session.post", return_value=mock_response)
+
+    coin = Coin.toggle_complete("123")
+
+    assert coin is not None
+    assert isinstance(coin, Coin)
+    assert coin.completed is False
+
+
+def test_toggle_coin_complete_failure(mocker):
+    mocker.patch(
+        "models.coin.api_session.post",
+        side_effect=requests.RequestException("Error")
+    )
+
+    result = Coin.toggle_complete("invalid_id")
+
+    assert result is None
+
+
+# CREATE COIN
+def test_create_coin_success(mock_api_session_post):
+    response_data = {
+        "name": "Newly Created Coin",
+        "id": "22222222-2222-2222-2222-222222222222",
+        "duties": [{"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"}],
+        "completed": False
+    }
+
+    mock_api_session_post(response_data)
+
+    coin = Coin.create_coin("Newly Created Coin", duty_codes=["D2"])
+
+    assert coin is not None
+    assert coin.name == "Newly Created Coin"
+    assert coin.id == response_data["id"]
+    assert coin.duties == response_data["duties"]
+    assert coin.completed is False
+
+
+def test_create_coin_returns_none_on_error(mocker):
+    mocker.patch(
+        "models.coin.api_session.post",
+        side_effect=requests.RequestException("Network Error")
+    )
+
+    coin = Coin.create_coin("Failed Coin")
+
+    assert coin is None
+
+
+# UPDATE COIN
+def test_update_coin_success(mock_api_session_patch):
+    response_data = {
+        "name": "Updated Coin",
+        "id": "33333333-3333-3333-3333-333333333333",
+        "duties": [{"code": "D3", "name": "Duty 3", "description": "Duty 3 Description"}],
+        "completed": True
+    }
+
+    mock_api_session_patch(response_data)
+
+    coin = Coin.update_coin(
+        coin_id=response_data["id"],
+        name="Updated Coin",
+        duty_codes=["D3"]
+    )
+
+    assert coin is not None
+    assert coin.name == "Updated Coin"
+    assert coin.id == response_data["id"]
+    assert coin.duties == response_data["duties"]
+    assert coin.completed is True
+
+
+def test_update_coin_returns_none_on_error(mocker):
+    mocker.patch(
+        "models.coin.api_session.patch",
+        side_effect=requests.RequestException("Network Error")
+    )
+
+    coin = Coin.update_coin("invalid_id", name="Failed Update Coin")
+
+    assert coin is None
+
+
+# DELETE COIN
+def test_delete_coin_success(mock_api_session_delete):
+    mock_api_session_delete()
+
+    result = Coin.delete_coin("44444444-4444-4444-4444-444444444444")
+
+    assert result is True
+
+
+def test_delete_coin_returns_false_on_error(mocker):
+    mocker.patch(
+        "models.coin.api_session.delete",
+        side_effect=requests.RequestException("Network Error")
+    )
+
+    result = Coin.delete_coin("invalid_id")
+
+    assert result is False

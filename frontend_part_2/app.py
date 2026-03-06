@@ -20,7 +20,7 @@ def landing_page():
         coins_data = load_fixture(fixture_file)
         coins = [Coin(c["name"], c["id"], c.get("duties", [])) for c in coins_data]
     else:
-        coins = CoinController().fetch_all_coins()
+        coins = CoinController.fetch_all_coins()
 
     return render_template("coins.html", coins=coins)
 
@@ -41,7 +41,7 @@ def coin_page(coin_id):
         else:
             coin = None
     else:
-        coin = CoinController().fetch_coin_by_id(coin_id)
+        coin = CoinController.fetch_coin_by_id(coin_id)
 
     if not coin:
         return "Coin not found", 404
@@ -51,22 +51,13 @@ def coin_page(coin_id):
 
 @app.route("/toggle_coin_complete", methods=["POST"])
 def toggle_coin_complete():
-    print("Toggle route hit")
-
     if not session.get("username"):
-        print("No session user")
         return "Unauthorized", 401
 
     coin_id = request.form.get("coin_id")
-    print("Coin ID:", coin_id)
+    coin_or_result = CoinController.toggle_coin_complete(coin_id)
 
-    try:
-        response = api_session.post(f"http://localhost:5000/coins/{coin_id}/complete")
-        print("Backend status:", response.status_code)
-        print("Backend response:", response.text)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        print("Error toggling:", e)
+    if coin_or_result is None:
         return "Server error", 500
 
     return redirect(request.referrer or "/")
@@ -86,7 +77,7 @@ def duty_page(duty_code):
         else:
             duty = None
     else:
-        duty = DutyController().fetch_duty(duty_code)
+        duty = DutyController.fetch_duty(duty_code)
 
     if not duty:
         return "Duty not found", 404

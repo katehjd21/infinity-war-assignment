@@ -121,7 +121,20 @@
       "id": "uuid-of-coin",
       "name": "Example Coin",
       "completed": false,
-      "duties": []
+      "duties": [
+        {
+          "id": "uuid-of-duty",
+          "code": "D1",
+          "name": "Duty 1 Name",
+          "description": "Duty 1 Description"
+        },
+        {
+          "id": "uuid-of-duty",
+          "code": "D2",
+          "name": "Duty 2 Name",
+          "description": "Duty 2 Description"
+        }
+      ]
     },
     "errors": [
       { "code": 400, "description": "Missing 'name', invalid 'completed', or invalid duty_codes." }
@@ -140,7 +153,20 @@
       "id": "uuid-of-coin",
       "name": "Example Coin",
       "completed": false,
-      "duties": []
+      "duties": [
+        {
+          "id": "uuid-of-duty",
+          "code": "D1",
+          "name": "Duty 1 Name",
+          "description": "Duty 1 Description"
+        },
+        {
+          "id": "uuid-of-duty",
+          "code": "D2",
+          "name": "Duty 2 Name",
+          "description": "Duty 2 Description"
+        }
+      ]
     },
     "errors": [
       { "code": 400, "description": "Missing 'name', invalid 'completed', or invalid duty_codes." },
@@ -164,23 +190,43 @@
   },
 
   "PATCH /v1/coins/:coin_id": {
-    "description": "Updates coin name (name required).",
+    "description": "Updates the name of a coin by UUID.",
     "requestBody": {
       "name": "Updated Coin Name"
     },
     "exampleResponse": {
       "id": "uuid-of-coin",
-      "name": "Updated Coin Name",
-      "completed": false
-    },
-    "errors": [
-      { "code": 400, "description": "Invalid Coin ID format, missing 'name', or invalid 'completed' value." },
-      { "code": 404, "description": "Coin not found." }
-    ]
+      "name": "Updated Coin Name"
+    }
   },
-
   "PATCH /v2/coins/:coin_id": {
-    "description": "Updates name, duties and/or completion state.",
+    "description": "Updates the name and/or associated duties of a coin.",
+    "requestBody": {
+      "name": "Updated Coin Name",
+      "duty_codes": ["D1", "D3"]
+    },
+    "exampleResponse": {
+      "id": "uuid-of-coin",
+      "name": "Updated Coin Name",
+      "duties": [
+        {
+          "id": "uuid-of-duty",
+          "code": "D1",
+          "name": "Duty 1 Name",
+          "description": "Duty 1 Description"
+        },
+        {
+          "id": "uuid-of-duty",
+          "code": "D3",
+          "name": "Duty 3 Name",
+          "description": "Duty 3 Description"
+        }
+      ]
+    }
+  },
+  "PATCH /v3/coins/:coin_id": {
+    "description": "Admin only update of coin.",
+    "authentication": "Admin required",
     "requestBody": {
       "name": "Updated Coin Name",
       "duty_codes": ["D1"],
@@ -190,17 +236,21 @@
       "id": "uuid-of-coin",
       "name": "Updated Coin Name",
       "completed": true,
-      "duties": []
+      "duties": [
+        {
+          "id": "uuid-of-duty",
+          "code": "D1",
+          "name": "Duty 1 Name",
+          "description": "Duty 1 Description"
+        },
+        {
+          "id": "uuid-of-duty",
+          "code": "D3",
+          "name": "Duty 3 Name",
+          "description": "Duty 3 Description"
+        }
+      ]
     },
-    "errors": [
-      { "code": 400, "description": "Invalid Coin ID format, invalid body, or invalid duty_codes." },
-      { "code": 404, "description": "Coin not found." }
-    ]
-  },
-
-  "PATCH /v3/coins/:coin_id": {
-    "description": "Admin only update of coin.",
-    "authentication": "Admin required",
     "errors": [
       { "code": 400, "description": "Invalid Coin ID format, invalid body, or invalid duty_codes." },
       { "code": 401, "description": "Authentication required." },
@@ -266,6 +316,19 @@
   "POST /v2/duties": {
     "description": "Admin only duty creation.",
     "authentication": "Admin required",
+    "requestBody": {
+      "code": "D10",
+      "name": "New Duty",
+      "description": "Duty description",
+      "coin_ids": ["uuid-of-coin"],
+      "ksb_codes": ["K1", "S1", "B1"]
+    },
+    "exampleResponse": {
+    "code": "D10",
+    "name": "New Duty",
+    "description": "Duty description",
+    "coins": []
+    },  
     "errors": [
       { "code": 400, "description": "Missing required fields, invalid coin_ids or ksb_codes." },
       { "code": 401, "description": "Authentication required." },
