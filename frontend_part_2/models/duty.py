@@ -1,26 +1,97 @@
 import requests
 from api_session import api_session
 
-
 class Duty:
-    def __init__(self, code, name, description, coins=None):
+    def __init__(self, code, name, description, id=None, coins=None, ksbs=None):
+        self.id = id
         self.code = code
         self.name = name
         self.description = description
-        self.coins = coins or [] 
+        self.coins = coins or []
+        self.ksbs = ksbs or []
 
     @classmethod
-    def fetch_duty_from_backend(cls, duty_code):
+    def fetch_duty_from_backend(cls, code):
         try:
-            response = api_session.get(f"http://localhost:5000/duties/{duty_code}")
+            response = api_session.get(f"http://localhost:5000/duties/{code}")
             response.raise_for_status()
             data = response.json()
             return cls(
-                code=data["code"],
+                code=data.get("code"),
                 name=data.get("name", ""),
                 description=data.get("description", ""),
-                coins=data.get("coins", [])
+                id=data.get("id"),
+                coins=data.get("coins", []),
+                ksbs=data.get("ksbs", [])
             )
         except requests.RequestException as e:
-            print(f"Error fetching duty {duty_code}:", e)
+            print(f"Error fetching duty {code}:", e)
             return None
+
+    @classmethod
+    def create_duty(cls, code, name, description, coin_ids=None, ksb_codes=None):
+        try:
+            response = api_session.post(
+                "http://localhost:5000/v2/duties",
+                json={
+                    "code": code,
+                    "name": name,
+                    "description": description,
+                    "coin_ids": coin_ids or [],
+                    "ksb_codes": ksb_codes or []
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            return cls(
+                code=data.get("code"),
+                name=data.get("name", ""),
+                description=data.get("description", ""),
+                id=data.get("id"),
+                coins=data.get("coins", []),
+                ksbs=data.get("ksbs", [])
+            )
+        except requests.RequestException as e:
+            print("Error creating duty:", e)
+            return None
+
+    @classmethod
+    def update_duty(cls, code, name=None, description=None, coin_ids=None, ksb_codes=None):
+        try:
+            request_body = {}
+            if name is not None:
+                request_body["name"] = name
+            if description is not None:
+                request_body["description"] = description
+            if coin_ids is not None:
+                request_body["coin_ids"] = coin_ids
+            if ksb_codes is not None:
+                request_body["ksb_codes"] = ksb_codes
+
+            response = api_session.patch(
+                f"http://localhost:5000/v2/duties/{code}",
+                json=request_body
+            )
+            response.raise_for_status()
+            data = response.json()
+            return cls(
+                code=data.get("code"),
+                name=data.get("name", ""),
+                description=data.get("description", ""),
+                id=data.get("id"),
+                coins=data.get("coins", []),
+                ksbs=data.get("ksbs", [])
+            )
+        except requests.RequestException as e:
+            print("Error updating duty:", e)
+            return None
+
+    @classmethod
+    def delete_duty(cls, code):
+        try:
+            response = api_session.delete(f"http://localhost:5000/v2/duties/{code}")
+            response.raise_for_status()
+            return True
+        except requests.RequestException as e:
+            print("Error deleting duty:", e)
+            return False

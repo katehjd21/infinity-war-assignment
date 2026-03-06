@@ -5,7 +5,6 @@
       {
         "id": "uuid-of-coin",
         "name": "Example Coin",
-        "completed": false
       }
     ],
     "errors": [
@@ -19,7 +18,6 @@
       {
         "id": "uuid-of-coin",
         "name": "Example Coin",
-        "completed": false,
         "duties": [
           {
             "id": "uuid-of-duty",
@@ -43,7 +41,14 @@
         "id": "uuid-of-coin",
         "name": "Example Coin",
         "completed": true,
-        "duties": []
+        "duties": [
+          {
+            "id": "uuid-of-duty",
+            "code": "D1",
+            "name": "Duty 1 Name",
+            "description": "Duty 1 Description"
+          }
+        ]
       }
     ],
     "errors": [
@@ -56,8 +61,7 @@
     "description": "Retrieves a single coin by UUID.",
     "exampleResponse": {
       "id": "uuid-of-coin",
-      "name": "Example Coin",
-      "completed": false
+      "name": "Example Coin"
     },
     "errors": [
       { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
@@ -70,8 +74,14 @@
     "exampleResponse": {
       "id": "uuid-of-coin",
       "name": "Example Coin",
-      "completed": false,
-      "duties": []
+      "duties": [
+        {
+            "id": "uuid-of-duty",
+            "code": "D1",
+            "name": "Duty 1 Name",
+            "description": "Duty 1 Description"
+          }
+      ]
     },
     "errors": [
       { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
@@ -85,7 +95,14 @@
       "id": "uuid-of-coin",
       "name": "Example Coin",
       "completed": true,
-      "duties": []
+      "duties": [
+        {
+            "id": "uuid-of-duty",
+            "code": "D1",
+            "name": "Duty 1 Name",
+            "description": "Duty 1 Description"
+          }
+      ]
     },
     "errors": [
       { "code": 400, "description": "Invalid Coin ID format. Coin ID must be a UUID." },
@@ -97,13 +114,11 @@
   "POST /v1/coins": {
     "description": "Creates a new coin (name required).",
     "requestBody": {
-      "name": "Example Coin",
-      "completed": false
+      "name": "Example Coin"
     },
     "exampleResponse": {
       "id": "uuid-of-new-coin",
       "name": "Example Coin",
-      "completed": false
     },
     "errors": [
       { "code": 400, "description": "Missing 'name' or invalid 'completed' value." }
@@ -114,13 +129,11 @@
     "description": "Creates a new coin and optionally associates duties.",
     "requestBody": {
       "name": "Example Coin",
-      "completed": false,
       "duty_codes": ["D1", "D2"]
     },
     "exampleResponse": {
       "id": "uuid-of-coin",
       "name": "Example Coin",
-      "completed": false,
       "duties": [
         {
           "id": "uuid-of-duty",
@@ -285,18 +298,31 @@
   },
 
   "GET /duties": {
-    "description": "Retrieves all duties.",
-    "errors": [
-      { "code": 400, "description": "Bad request." }
+    "description": "Retrieves a list of all duties.",
+    "exampleResponse": [
+      {
+        "id": "uuid-of-duty",
+        "code": "D1",
+        "name": "Duty 1 Name",
+        "description": "Duty 1 Description"
+      }
     ]
   },
 
   "GET /duties/:duty_code": {
-    "description": "Retrieves a duty with associated coins and KSBs.",
-    "errors": [
-      { "code": 400, "description": "Invalid Duty Code format." },
-      { "code": 404, "description": "Duty not found." }
-    ]
+    "description": "Retrieves a single duty by code along with coins associated with it.",
+    "exampleResponse": {
+      "id": "uuid-of-duty",
+      "code": "D1",
+      "name": "Duty 1 Name",
+      "description": "Duty 1 Description",
+      "coins": [
+        {
+          "id": "uuid-of-coin",
+          "name": "Example Coin"
+        }
+      ]
+    }
   },
 
   "POST /v1/duties": {
@@ -327,7 +353,8 @@
     "code": "D10",
     "name": "New Duty",
     "description": "Duty description",
-    "coins": []
+    "coins": [],
+    "ksbs": []
     },  
     "errors": [
       { "code": 400, "description": "Missing required fields, invalid coin_ids or ksb_codes." },
@@ -375,19 +402,56 @@
   },
 
   "GET /ksbs": {
-    "description": "Retrieves all KSBs.",
-    "errors": [
-      { "code": 400, "description": "Bad request." }
-    ]
-  },
+      "description": "Retrieves a list of all KSBs (Knowledge, Skill, Behaviour).",
+      "exampleResponse": [
+        {
+          "id": "uuid-of-ksb",
+          "code": "K1",
+          "name": "Knowledge 1 Name",
+          "description": "Knowledge 1 Description",
+          "type": "Knowledge"
+        },
+        {
+          "id": "uuid-of-ksb",
+          "code": "S1",
+          "name": "Skill 1 Name",
+          "description": "Skill 1 Description",
+          "type": "Skill"
+        },
+        {
+          "id": "uuid-of-ksb",
+          "code": "B1",
+          "name": "Behaviour 1 Name",
+          "description": "Behaviour 1 Description",
+          "type": "Behaviour"
+        }
+      ]
+    },
 
-  "GET /ksbs/:ksb_code": {
-    "description": "Retrieves a KSB with associated duties.",
-    "errors": [
-      { "code": 400, "description": "Invalid KSB Code format." },
-      { "code": 404, "description": "KSB not found." }
-    ]
-  },
+    "GET /ksbs/:ksb_code": {
+      "description": "Retrieves a single KSB by code along with associated duties.",
+      "exampleResponse": {
+        "id": "uuid-of-ksb",
+        "code": "K1",
+        "name": "Knowledge 1 Name",
+        "description": "Knowledge 1 Description",
+        "type": "Knowledge",
+        "duties": [
+          {
+            "id": "uuid-of-duty",
+            "code": "D1",
+            "name": "Duty 1 Name",
+            "description": "Duty 1 Description"
+          },
+          {
+            "id": "uuid-of-duty",
+            "code": "D2",
+            "name": "Duty 2 Name",
+            "description": "Duty 2 Description"
+          }
+        ]
+      }
+    },
 
   "POST /login": {
     "description": "Logs in a user.",

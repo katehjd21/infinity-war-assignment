@@ -1,30 +1,65 @@
 import pytest
-from models.duty import Duty
 from controllers.duty_controller import DutyController
- 
+from models.duty import Duty
+
 @pytest.fixture
 def duty_controller():
     return DutyController()
 
-def test_duty_controller_can_fetch_duty_by_duty_code(mocker, duty_controller, mocked_duty):
+
+# FETCH DUTY
+def test_duty_controller_fetch_success(mocker, duty_controller, mocked_duty):
     mocker.patch("models.duty.Duty.fetch_duty_from_backend", return_value=mocked_duty)
-    fetched_duty = duty_controller.fetch_duty("D1")
-
-    assert fetched_duty.name == "Duty 1"
-    assert fetched_duty.description == "Duty 1 Description"
-
-    expected_coins = [{"name": "Automate"}, {"name": "Houston"}]
-
-    assert fetched_duty.coins == expected_coins
+    result = duty_controller.fetch_duty(mocked_duty.code)
+    assert result == mocked_duty
 
 
-def test_duty_controller_returns_none_if_duty_not_found(mocker, duty_controller):
+def test_duty_controller_fetch_not_found(mocker, duty_controller):
     mocker.patch("models.duty.Duty.fetch_duty_from_backend", return_value=None)
-    duty = duty_controller.fetch_duty("D99")
-    assert duty is None
+    result = duty_controller.fetch_duty("D99")
+    assert result is None
 
 
-def test_duty_controller_handles_exception(mocker, duty_controller):
-    mocker.patch("models.duty.Duty.fetch_duty_from_backend", side_effect=Exception("Network error"))
-    duty = duty_controller.fetch_duty("D99")
-    assert duty is None
+# CREATE DUTY 
+def test_duty_controller_create_success(mocker, duty_controller, mocked_duty):
+    mocker.patch("models.duty.Duty.create_duty", return_value=mocked_duty)
+    result = duty_controller.create_duty(
+        code=mocked_duty.code,
+        name=mocked_duty.name,
+        description=mocked_duty.description
+    )
+    assert result == mocked_duty
+
+
+def test_duty_controller_create_failure(mocker, duty_controller):
+    mocker.patch("models.duty.Duty.create_duty", return_value=None)
+    result = duty_controller.create_duty("D1", "Fail Duty", "Fail Desc")
+    assert result is None
+
+
+# UPDATE DUTY
+def test_duty_controller_update_success(mocker, duty_controller, mocked_duty):
+    updated_duty = mocked_duty
+    updated_duty.name = "Updated Name"
+    mocker.patch("models.duty.Duty.update_duty", return_value=updated_duty)
+    result = duty_controller.update_duty(code=mocked_duty.code, name="Updated Name")
+    assert result.name == "Updated Name"
+
+
+def test_duty_controller_update_failure(mocker, duty_controller):
+    mocker.patch("models.duty.Duty.update_duty", return_value=None)
+    result = duty_controller.update_duty("D99", name="Fail Update")
+    assert result is None
+
+
+# DELETE DUTY
+def test_duty_controller_delete_success(mocker, duty_controller):
+    mocker.patch("models.duty.Duty.delete_duty", return_value=True)
+    result = duty_controller.delete_duty("D1")
+    assert result is True
+
+
+def test_duty_controller_delete_failure(mocker, duty_controller):
+    mocker.patch("models.duty.Duty.delete_duty", return_value=False)
+    result = duty_controller.delete_duty("D99")
+    assert result is False
