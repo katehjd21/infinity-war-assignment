@@ -4,20 +4,23 @@ from models import Coin, User, RequestLog
 from helpers.duty import DutyHelper
 from helpers.coin import CoinHelper
 from helpers.ksb import KsbHelper
+from helpers.admin_logs import AdminLogsHelper
 from utils.helper_functions import serialize_coin, serialize_coin_with_duties, serialize_duty_with_coins_and_ksbs
 from decorators import admin_required, login_required
 from pg_db_connection import pg_db, database 
 import os
 
-database.initialize(pg_db)
+if not os.getenv("TESTING") and pg_db is not None:
+    database.initialize(pg_db)
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)
 
 @app.before_request
 def before_request():
-    if os.getenv("TESTING"):
+    if os.getenv("TESTING") or pg_db is None:
         return
-    if pg_db.is_closed(): 
+
+    if pg_db.is_closed():
         pg_db.connect(reuse_if_open=True)
 
 @app.before_request
@@ -105,7 +108,7 @@ def create_coin_v3():
 @login_required
 def complete_coin(coin_id):
     new_state = CoinHelper.toggle_complete_coin(coin_id)
-    return jsonify({"message": "Coin completion toggled", "completed": new_state}), 200
+    return jsonify({"message": "Coin completion toggled", "coin_id": coin_id, "completed": new_state}), 200
 
 
 # PATCH/UPDATE COIN
@@ -139,12 +142,16 @@ def delete_coin_v2(coin_id):
 
 
 # GET DUTIES
-@app.get("/duties")
-def get_duties():
-    return jsonify(DutyHelper.list_all_duties()), 200
+@app.get("/v1/duties")
+def get_duties_v1():
+    return jsonify(DutyHelper.list_all_duties(full=False)), 200
+
+@app.get("/v2/duties")
+def get_duties_v2():
+    return jsonify(DutyHelper.list_all_duties(full=True)), 200
 
 
-# GET DUTY BY CODE WITH ASSOCIATED COINS
+# GET DUTY BY CODE WITH ASSOCIATED COINS AND KSBS
 @app.get("/duties/<duty_code>")
 def get_duty_by_code(duty_code):
     return jsonify(DutyHelper.get_duty_by_code(duty_code)), 200
@@ -214,6 +221,7 @@ def login():
         return jsonify({"error": "Invalid username or password"}), 401
 
     session["user_id"] = str(user.id)
+    session["username"] = user.username
     session["role"] = user.role
 
     return jsonify({"message": "Login successful", "role": user.role}), 200
@@ -228,20 +236,8 @@ def logout():
 @app.get("/admin/logs")
 @admin_required
 def view_logs():
-    logs = (RequestLog
-            .select()
-            .order_by(RequestLog.timestamp.desc())
-            .limit(100))
-
-    return jsonify([
-        {
-            "method": log.method,
-            "path": log.path,
-            "user": log.user.username if log.user else "Anonymous",
-            "timestamp": log.timestamp
-        }
-        for log in logs
-    ])
+    logs = AdminLogsHelper.get_recent_logs()
+    return jsonify(logs)
 
 
 if __name__ == '__main__':

@@ -7,6 +7,26 @@ def duty_controller():
     return DutyController()
 
 
+# FETCH ALL DUTIES
+def test_duty_controller_calls_model_method_fetches_duties(mocker, duty_controller, mocked_duties):
+    mock_model = mocker.patch(
+        "models.duty.Duty.fetch_duties_from_backend",
+        return_value=mocked_duties
+    )
+
+    result = duty_controller.fetch_all_duties()
+
+    mock_model.assert_called_once()
+    assert result == mocked_duties
+
+
+def test_duty_controller_fetch_all_duties_returns_empty_if_no_duties(mocker, duty_controller):
+    mocker.patch("models.duty.Duty.fetch_duties_from_backend", return_value=[])
+    fetched_duties = duty_controller.fetch_all_duties()
+    
+    assert fetched_duties == []
+
+
 # FETCH DUTY
 def test_duty_controller_fetch_success(mocker, duty_controller, mocked_duty):
     mocker.patch("models.duty.Duty.fetch_duty_from_backend", return_value=mocked_duty)

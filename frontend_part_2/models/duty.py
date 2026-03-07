@@ -9,6 +9,29 @@ class Duty:
         self.description = description
         self.coins = coins or []
         self.ksbs = ksbs or []
+    
+
+    @classmethod
+    def fetch_duties_from_backend(cls):
+        try:
+            response = api_session.get("http://localhost:5000/v2/duties")
+            response.raise_for_status()
+            duty_data = response.json()
+            return [
+                cls(
+                    code=duty.get("code"),
+                    name=duty.get("name", ""),
+                    description=duty.get("description", ""),
+                    id=duty.get("id"),
+                    coins=duty.get("coins", []),
+                    ksbs=duty.get("ksbs", [])
+                )
+                for duty in duty_data
+            ]
+        except requests.RequestException as e:
+            print("Error fetching duties:", e)
+            return []
+        
 
     @classmethod
     def fetch_duty_from_backend(cls, code):
@@ -43,7 +66,7 @@ class Duty:
             )
             response.raise_for_status()
             data = response.json()
-            return cls(
+            duty = cls(
                 code=data.get("code"),
                 name=data.get("name", ""),
                 description=data.get("description", ""),
@@ -51,9 +74,19 @@ class Duty:
                 coins=data.get("coins", []),
                 ksbs=data.get("ksbs", [])
             )
-        except requests.RequestException as e:
-            print("Error creating duty:", e)
-            return None
+            return duty, None
+        
+        
+        except requests.HTTPError:
+            try:
+                error = response.json().get("description") or response.json().get("message")
+            except Exception:
+                error = "Failed to create duty"
+
+            return None, error
+
+        except requests.RequestException:
+            return None, "Server error while creating duty"
 
     @classmethod
     def update_duty(cls, code, name=None, description=None, coin_ids=None, ksb_codes=None):
@@ -74,7 +107,7 @@ class Duty:
             )
             response.raise_for_status()
             data = response.json()
-            return cls(
+            duty = cls(
                 code=data.get("code"),
                 name=data.get("name", ""),
                 description=data.get("description", ""),
@@ -82,9 +115,18 @@ class Duty:
                 coins=data.get("coins", []),
                 ksbs=data.get("ksbs", [])
             )
-        except requests.RequestException as e:
-            print("Error updating duty:", e)
-            return None
+            return duty, None
+        
+        except requests.HTTPError:
+            try:
+                error = response.json().get("description") or response.json().get("message")
+            except Exception:
+                error = "Failed to update duty"
+
+            return None, error
+
+        except requests.RequestException:
+            return None, "Server error while updating duty"
 
     @classmethod
     def delete_duty(cls, code):

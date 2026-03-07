@@ -14,7 +14,7 @@ def test_delete_coin_v1_returns_400_if_invalid_id(client):
 
     assert response.status_code == 400
     assert response.json["description"] == (
-        "Invalid Coin ID format. Coin ID must be a UUID (non-integer)."
+        "Invalid Coin ID: invalid_id. Coin ID must be a UUID (non-integer)."
     )
 
 

@@ -6,13 +6,15 @@ load_dotenv()
 
 database = DatabaseProxy()
 
-pg_db = PostgresqlDatabase(
-    os.getenv('DATABASE'),
-    user=os.getenv('DB_USERNAME'),
-    password=os.getenv('DB_PASSWORD'),
-    host=os.getenv('HOST'),
-    port=int(os.getenv('PORT')),
-    sslmode=os.getenv('SSLMODE')
-)
+pg_db = None
+if not os.getenv("TESTING"):
+    pg_db = PostgresqlDatabase(
+        os.getenv("DATABASE"),
+        user=os.getenv("DB_USERNAME"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("HOST"),
+        port=int(os.getenv("PORT")),
+        sslmode=os.getenv("SSLMODE")
+    )
 
-TEST_DB = SqliteDatabase(':memory:')
+TEST_DB = SqliteDatabase(":memory:")

@@ -2,8 +2,7 @@ import pytest
 import uuid
 from helpers.coin import CoinHelper
 from models import Coin, DutyCoin
-from werkzeug.exceptions import HTTPException
-
+from werkzeug.exceptions import HTTPException, BadRequest
 
 
 # TEST VALIDATE COIN NAME
@@ -34,7 +33,7 @@ def test_get_coin_by_id_returns_coin(coin):
 def test_get_coin_by_id_invalid_uuid_raises_abort():
     with pytest.raises(HTTPException) as e:
         CoinHelper.get_coin_by_id("not-a-uuid")
-    assert "Invalid Coin ID format. Coin ID must be a UUID (non-integer)." in str(e.value)
+    assert "Invalid Coin ID: not-a-uuid. Coin ID must be a UUID (non-integer)." in str(e.value)
 
 
 def test_get_coin_by_id_nonexistent_raises_abort():
@@ -51,9 +50,10 @@ def test_attach_duties_adds_links(coin, duties):
 
 
 def test_attach_duties_invalid_duty_raises_abort(coin):
-    with pytest.raises(HTTPException) as e:
+    with pytest.raises(BadRequest) as e:
         CoinHelper.attach_duties(coin, ["NOT FOUND"])
-    assert "Duty with code 'NOT FOUND' does not exist" in str(e.value)
+    
+    assert "Invalid duty codes: NOT FOUND" in str(e.value)
 
 
 def test_attach_duties_non_list_raises_abort(coin):
@@ -113,6 +113,14 @@ def test_create_coin_invalid_completed_type_raises_abort():
     assert "'completed' must be a boolean" in str(e.value)
 
 
+def test_create_coin_with_empty_duty_codes_list():
+    data = {"name": "Empty Duties Coin", "duty_codes": []}
+    coin = CoinHelper.create_coin(data, with_duties=True)
+    assert coin.name == "Empty Duties Coin"
+    linked_duties = list(DutyCoin.select().where(DutyCoin.coin == coin))
+    assert linked_duties == []
+
+
 # TEST TOGGLE COMPLETE COIN
 def test_toggle_complete_coin_sets_flag():
     coin = Coin.create(name="Test Coin")
@@ -131,7 +139,7 @@ def test_toggle_complete_coin_sets_flag():
 def test_toggle_complete_coin_invalid_id():
     with pytest.raises(HTTPException) as e:
         CoinHelper.toggle_complete_coin("invalid-uuid")
-    assert "Invalid Coin ID format" in str(e.value)
+    assert "Invalid Coin ID" in str(e.value)
 
 def test_toggle_complete_coin_nonexistent():
     fake_id = "11111111-1111-1111-1111-111111111111"
@@ -176,6 +184,19 @@ def test_update_coin_invalid_completed_type_raises_abort(coin):
     assert "'completed' must be a boolean" in str(e.value)
 
 
+def test_update_coin_empty_body_raises_abort(coin):
+    with pytest.raises(HTTPException) as e:
+        CoinHelper.update_coin(str(coin.id), {})
+    assert "Request body is empty" in str(e.value)
+
+
+def test_update_coin_invalid_duty_code_raises_abort(coin):
+    with pytest.raises(BadRequest) as e:
+        CoinHelper.update_coin(str(coin.id), {"duty_codes": ["INVALID"]})
+    
+    assert "Invalid duty codes: INVALID" in str(e.value)
+
+
 # TEST DELETE COIN
 def test_delete_coin_removes_coin(coin):
     CoinHelper.delete_coin(str(coin.id))
@@ -184,7 +205,7 @@ def test_delete_coin_removes_coin(coin):
 def test_delete_coin_invalid_uuid_raises_abort():
     with pytest.raises(HTTPException) as e:
         CoinHelper.delete_coin("invalid")
-    assert "Invalid Coin ID format. Coin ID must be a UUID (non-integer)." in str(e.value)
+    assert "Invalid Coin ID: invalid. Coin ID must be a UUID (non-integer)." in str(e.value)
 
 def test_delete_coin_nonexistent_raises_abort():
     random_uuid = str(uuid.uuid4())

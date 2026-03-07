@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-page">
+    <h1>Admin - Duties</h1>
+
+    <a href="{{ url_for('admin_create_duty') }}" class="create-new">Create New Duty</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Coins</th>
+                <th>KSBs</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for duty in duties %}
+            <tr>
+                <td>{{ duty.code }}</td>
+                <td>{{ duty.name }}</td>
+                <td>{{ duty.description }}</td>
+                <td>
+                    {% if duty.coins %}
+                        {% for coin in duty.coins %}
+                            {{ coin.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        None
+                    {% endif %}
+                </td>
+                <td>
+                    {% if duty.ksbs %}
+                        {% for ksb in duty.ksbs %}
+                            {{ ksb }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        None
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_edit_duty', duty_code=duty.code) }}" class="edit-button">Edit</a>
+                    <form method="POST" action="{{ url_for('admin_delete_duty', duty_code=duty.code) }}">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('landing_page') }}" class="back-link">Back to Coins</a>
+</div>
+{% endblock %}

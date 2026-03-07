@@ -20,7 +20,7 @@
             <td>{{ log.method }}</td>
             <td>{{ log.path }}</td>
             <td>{{ log.user }}</td>
-            <td>{{ log.timestamp }}</td>
+            <td>{{ log.timestamp.replace("T", " ")[:19] }}</td>
         </tr>
         {% endfor %}
     </tbody>

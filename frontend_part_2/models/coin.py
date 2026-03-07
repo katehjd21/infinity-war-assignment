@@ -76,17 +76,26 @@ class Coin:
             response.raise_for_status()
             data = response.json()
 
-            return cls(
+            coin = cls(
                 data["name"],
                 data["id"],
                 data.get("duties", []),
                 data.get("completed", False)
             )
 
-        except requests.RequestException as e:
-            print("Error creating coin:", e)
-            return None
-        
+            return coin, None
+
+        except requests.HTTPError:
+            try:
+                error = response.json().get("description") or response.json().get("message")
+            except Exception:
+                error = "Failed to create coin"
+
+            return None, error
+
+        except requests.RequestException:
+            return None, "Server error while creating coin"
+            
     
     @classmethod
     def update_coin(cls, coin_id, name=None, duty_codes=None):
@@ -107,17 +116,26 @@ class Coin:
             response.raise_for_status()
             data = response.json()
 
-            return cls(
+            coin = cls(
                 data["name"],
                 data["id"],
                 data.get("duties", []),
                 data.get("completed", False)
             )
 
-        except requests.RequestException as e:
-            print("Error updating coin:", e)
-            return None
-    
+            return coin, None
+
+        except requests.HTTPError:
+            try:
+                error = response.json().get("description") or response.json().get("message")
+            except Exception:
+                error = "Failed to update coin"
+
+            return None, error
+
+        except requests.RequestException:
+            return None, "Server error while updating coin"
+        
 
     @classmethod
     def delete_coin(cls, coin_id):

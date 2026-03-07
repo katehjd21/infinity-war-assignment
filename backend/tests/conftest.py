@@ -3,27 +3,32 @@ from pg_db_connection import database, TEST_DB
 from app import app as flask_app
 from werkzeug.security import generate_password_hash
 from models import Coin, Duty, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour, User, RequestLog
+import os
 
+os.environ["TESTING"] = "1"
 
-@pytest.fixture(scope="function", autouse=True)
-def use_test_db():
+@pytest.fixture(scope="session", autouse=True)
+def setup_test_db():
     database.initialize(TEST_DB)
     TEST_DB.connect()
-    
     TEST_DB.create_tables([
         Coin, Duty, Knowledge, Skill, Behaviour,
         DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
         User, RequestLog
     ])
-    
-    yield  
-    
+    yield
     TEST_DB.drop_tables([
         Coin, Duty, Knowledge, Skill, Behaviour,
         DutyCoin, DutyKnowledge, DutySkill, DutyBehaviour,
         User, RequestLog
     ])
     TEST_DB.close()
+
+@pytest.fixture(autouse=True)
+def use_transaction():
+    with TEST_DB.atomic() as txn:
+        yield
+        txn.rollback()
 
 
 @pytest.fixture
@@ -150,22 +155,26 @@ def ksbs_with_duties():
 
 @pytest.fixture
 def create_admin_user():
-    admin = User.create(
+    admin, _ = User.get_or_create(
         username="admin",
-        password_hash=generate_password_hash("password123"),
-        role="admin"
+        defaults={
+            "password_hash": generate_password_hash("password123"),
+            "role": "admin",
+        }
     )
     yield admin
 
 
 @pytest.fixture
 def create_authenticated_user():
-    authenticated_user = User.create(
+    user, _ = User.get_or_create(
         username="authenticated_user",
-        password_hash=generate_password_hash("password"),
-        role="authenticated_user"
+        defaults={
+            "password_hash": generate_password_hash("password"),
+            "role": "authenticated_user",
+        }
     )
-    yield authenticated_user
+    yield user
 
 @pytest.fixture
 def logged_in_admin(client, create_admin_user):
@@ -176,6 +185,7 @@ def logged_in_admin(client, create_admin_user):
 
     assert response.status_code == 200
     return client
+
 
 @pytest.fixture
 def logged_in_authenticated_user(client, create_authenticated_user):

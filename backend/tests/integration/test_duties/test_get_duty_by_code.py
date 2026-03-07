@@ -47,6 +47,22 @@ def test_duty_coins_return_id_and_name_of_coins(client, duties, coins_with_dutie
             assert set(coin.keys()) == {"id", "name"}
 
 
+def test_get_duty_by_code_v2_returns_coins_and_ksbs(client, duties, coins, ksbs):
+    duty = duties[0]
+    from helpers.duty import DutyHelper
+    DutyHelper.attach_coins_to_duty(duty, [str(coins[0].id)])
+    DutyHelper.attach_ksbs_to_duty(duty, [ksbs[0].code])
+
+    response = client.get(f"/duties/{duty.code}")
+    data = response.json
+
+    assert data["code"] == duty.code
+    assert len(data["coins"]) == 1
+    assert data["coins"][0]["id"] == str(coins[0].id)
+    assert len(data["ksbs"]) == 1
+    assert data["ksbs"][0] == ksbs[0].code
+
+
 def test_get_duty_by_code_returns_400_if_invalid_code(client):
     response = client.get("/duties/invalid_code")
     assert response.status_code == 400

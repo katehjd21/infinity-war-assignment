@@ -30,7 +30,7 @@ def test_get_coin_by_id_invalid_uuid_v1(client):
     response = client.get("/v1/coins/invalid_id")
 
     assert response.status_code == 400
-    assert response.json["description"] == "Invalid Coin ID format. Coin ID must be a UUID (non-integer)."
+    assert response.json["description"] == "Invalid Coin ID: invalid_id. Coin ID must be a UUID (non-integer)."
 
 
 def test_get_coin_by_id_only_returns_id_and_name_v1(client, coin):
@@ -107,7 +107,7 @@ def test_get_coin_by_id_invalid_uuid_v2(client):
     response = client.get("/v2/coins/invalid_id")
 
     assert response.status_code == 400
-    assert response.json["description"] == "Invalid Coin ID format. Coin ID must be a UUID (non-integer)."
+    assert response.json["description"] == "Invalid Coin ID: invalid_id. Coin ID must be a UUID (non-integer)."
 
 
 def test_get_coin_by_id_returns_id_name_and_associated_duties_v2(client, coin_with_duties):

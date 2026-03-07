@@ -8,6 +8,11 @@ from models import Duty, Knowledge, Skill, Behaviour, DutyCoin, DutyKnowledge, D
 # VALIDATE DUTY CODE
 def test_validate_duty_code_empty(client):
     with pytest.raises(HTTPException) as e:
+        DutyHelper.validate_duty_code(None)
+    assert e.value.code == 400
+    assert "cannot be empty" in e.value.description
+
+    with pytest.raises(HTTPException) as e:
         DutyHelper.validate_duty_code("")
     assert e.value.code == 400
     assert "cannot be empty" in e.value.description
@@ -77,17 +82,22 @@ def test_attach_coins_creates_associations(duties, coins):
 
 def test_attach_coins_invalid_uuid(duties):
     duty = duties[0]
+    invalid_ids = ["not-a-uuid", "also-bad"]
     with pytest.raises(HTTPException) as e:
-        DutyHelper.attach_coins_to_duty(duty, ["not-a-uuid"])
-    assert "Invalid coin id" in str(e.value)
+        DutyHelper.attach_coins_to_duty(duty, invalid_ids)
+    for bad_id in invalid_ids:
+        assert bad_id in e.value.description
+    assert e.value.code == 400
 
 
 def test_attach_coins_nonexistent_coin(duties):
     duty = duties[0]
-    fake_id = str(uuid.uuid4())
+    fake_ids = [str(uuid.uuid4()), str(uuid.uuid4())]
     with pytest.raises(HTTPException) as e:
-        DutyHelper.attach_coins_to_duty(duty, [fake_id])
-    assert "Invalid coin id" in str(e.value)
+        DutyHelper.attach_coins_to_duty(duty, fake_ids)
+    for bad_id in fake_ids:
+        assert bad_id in e.value.description
+    assert e.value.code == 400
 
 
 def test_attach_coins_non_list_input(duties):
@@ -96,6 +106,7 @@ def test_attach_coins_non_list_input(duties):
         DutyHelper.attach_coins_to_duty(duty, "not-a-list")
     assert "'coin_ids' must be a list" in str(e.value)
 
+
 def test_attach_coins_duplicate_ids(duties, coins):
     duty = duties[0]
     coin_id = str(coins[0].id)
@@ -103,6 +114,21 @@ def test_attach_coins_duplicate_ids(duties, coins):
     
     associated_coins = [dc.coin.id for dc in DutyCoin.select().where(DutyCoin.duty == duty)]
     assert associated_coins.count(coins[0].id) == 1
+
+
+def test_attach_coins_mixed_valid_and_invalid(duties, coins):
+    duty = duties[0]
+    valid_id = str(coins[0].id)
+    invalid_ids = ["not-a-uuid", str(uuid.uuid4())]
+    
+    with pytest.raises(HTTPException) as e:
+        DutyHelper.attach_coins_to_duty(duty, [valid_id] + invalid_ids)
+    
+    for bad_id in invalid_ids:
+        assert bad_id in e.value.description
+    assert e.value.code == 400
+    
+    assert not DutyCoin.select().where(DutyCoin.coin == coins[0], DutyCoin.duty == duty).exists()
 
 
 # ATTACH KSBS
@@ -121,26 +147,78 @@ def test_attach_ksbs_to_duty_creates_links(duties, ksbs):
         elif isinstance(ksb, Behaviour):
             assert DutyBehaviour.select().where(DutyBehaviour.duty == duty, DutyBehaviour.behaviour == ksb).exists()
 
+
 def test_attach_ksbs_to_duty_ignores_invalid_codes(duties):
     duty = duties[0]
-    DutyHelper.attach_ksbs_to_duty(duty, ["X999"])
+    with pytest.raises(HTTPException) as e:
+        DutyHelper.attach_ksbs_to_duty(duty, ["X999", "INB"])
+    assert e.value.code == 400
+    assert "Invalid KSB codes: X999, INB" in e.value.description
+
     assert DutyKnowledge.select().where(DutyKnowledge.duty == duty).count() == 0
     assert DutySkill.select().where(DutySkill.duty == duty).count() == 0
     assert DutyBehaviour.select().where(DutyBehaviour.duty == duty).count() == 0
+
+
+def test_attach_ksbs_to_duty_mixed_valid_invalid(duties, ksbs):
+    duty = duties[0]
+
+    valid_code = ksbs[0].code
+    invalid_codes = ["X999", "INB"]
+    mixed_codes = [valid_code] + invalid_codes
+
+    with pytest.raises(HTTPException) as e:
+        DutyHelper.attach_ksbs_to_duty(duty, mixed_codes)
+
+    assert e.value.code == 400
+    assert "Invalid KSB codes: X999, INB" in e.value.description
+
+    if isinstance(ksbs[0], Knowledge):
+        assert DutyKnowledge.select().where(DutyKnowledge.duty == duty, DutyKnowledge.knowledge == ksbs[0]).exists()
+    elif isinstance(ksbs[0], Skill):
+        assert DutySkill.select().where(DutySkill.duty == duty, DutySkill.skill == ksbs[0]).exists()
+    elif isinstance(ksbs[0], Behaviour):
+        assert DutyBehaviour.select().where(DutyBehaviour.duty == duty, DutyBehaviour.behaviour == ksbs[0]).exists()
+
+    assert DutyKnowledge.select().where(DutyKnowledge.duty == duty).count() + \
+           DutySkill.select().where(DutySkill.duty == duty).count() + \
+           DutyBehaviour.select().where(DutyBehaviour.duty == duty).count() == 1
 
 
 # LIST ALL DUTIES
 def test_list_all_duties_empty(duties):
     for duty in Duty.select():
         duty.delete_instance()
-    result = DutyHelper.list_all_duties()
+    result = DutyHelper.list_all_duties(full=False)
     assert result == []
 
 
 def test_list_all_duties_returns_duties(duties):
-    result = DutyHelper.list_all_duties()
+    result = DutyHelper.list_all_duties(full=False)
     codes = [duty["code"] for duty in result]
     assert set(codes) == {duty.code for duty in duties}
+
+
+# LIST ALL DUTIES WITH COINS AND KSBS
+def test_list_all_duties_with_coins_and_ksbs(duties, coins, ksbs):
+    duty = duties[0]
+    DutyHelper.attach_coins_to_duty(duty, [str(coins[0].id), str(coins[1].id)])
+    DutyHelper.attach_ksbs_to_duty(duty, [ksb.code for ksb in ksbs])
+
+    result = DutyHelper.list_all_duties(full=True)
+
+    serialized_duty = next(d for d in result if d["code"] == duty.code)
+    coin_ids = [c["id"] for c in serialized_duty["coins"]]
+
+    expected_ids = {str(coins[0].id), str(coins[1].id)}
+    assert set(coin_ids) == expected_ids
+
+
+def test_list_all_duties_with_coins_and_ksbs_empty():
+    for duty in Duty.select():
+        duty.delete_instance()
+    result = DutyHelper.list_all_duties(full=True)
+    assert result == []
 
 
 # GET DUTY BY CODE
@@ -156,12 +234,23 @@ def test_get_duty_by_code_not_found():
     assert e.value.code == 404
 
 
-def test_get_duty_by_code_success(duties, coins):
+def test_get_duty_by_code_with_coins_success(duties, coins):
     duty = duties[0]
     DutyHelper.attach_coins_to_duty(duty, [str(coins[0].id)])
     result = DutyHelper.get_duty_by_code(duty.code)
     assert result["code"] == duty.code
     assert len(result["coins"]) == 1
+
+
+def test_get_duty_by_code_with_coins_and_ksbs_success(duties, coins, ksbs):
+    duty = duties[0]
+    DutyHelper.attach_coins_to_duty(duty, [str(coins[0].id)])
+    DutyHelper.attach_ksbs_to_duty(duty, [ksbs[0].code])
+
+    result = DutyHelper.get_duty_by_code(duty.code)
+    assert result["code"] == duty.code
+    assert len(result["coins"]) == 1
+    assert result["coins"][0]["id"] == str(coins[0].id)
 
 
 # CREATE DUTY

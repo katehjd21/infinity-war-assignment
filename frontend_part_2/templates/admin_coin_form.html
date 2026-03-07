@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ coin.id and "Edit Coin" or "Create Coin" }}</h1>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="POST" class="form-container">
+
+    <div class="form-group">
+        <label for="name">Coin Name</label>
+        <input type="text" name="name" id="name" value="{{ coin.name if coin else '' }}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="duty_codes">Duty Codes (comma-separated)</label>
+        <input type="text" name="duty_codes" id="duty_codes" value="{{ coin.duties|map(attribute='code')|join(',') if coin else '' }}">
+    </div>
+
+    <button type="submit" class="save-button">Save</button>
+</form>
+
+<a href="{{ url_for('admin_coins_page') }}" class="back-link">Back to Coins</a>
+{% endblock %}

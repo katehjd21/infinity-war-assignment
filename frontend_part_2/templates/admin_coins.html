@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-page">
+    <h1>Admin - Coins</h1>
+
+    <a href="{{ url_for('admin_create_coin') }}" class="create-new">Create New Coin</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Completed</th>
+                <th>Duties</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coin in coins %}
+            <tr>
+                <td>{{ coin.name }}</td>
+                <td>{{ '✓ Completed' if coin.completed else '⏳ In Progress' }}</td>
+                <td>
+                    {% for duty in coin.duties %}
+                        {{ duty.code }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_edit_coin', coin_id=coin.id) }}" class="edit-button">Edit</a>
+                    <form method="POST" action="{{ url_for('admin_delete_coin', coin_id=coin.id) }}">
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -43,8 +43,35 @@ def mock_api_session_delete(mocker):
         return mock_response
     return _mock
 
+# FETCH ALL DUTIES
+def test_fetch_all_duties_from_backend(mocked_duties_response, mock_api_session_get):
+    mock_api_session_get(mocked_duties_response)
+    duties = Duty.fetch_duties_from_backend()
+    assert len(duties) == len(mocked_duties_response)
 
-# FETCH DUTY
+    duty_by_code = {duty.code: duty for duty in duties}
+    for response in mocked_duties_response:
+        duty = duty_by_code[response["code"]]
+        assert duty.name == response["name"]
+        assert duty.description == response.get("description")
+
+
+def test_fetch_empty_duties_list_from_backend(mock_api_session_get):
+    mock_api_session_get([])
+    duties = Duty.fetch_duties_from_backend()
+    assert duties == []
+
+
+def test_fetch_all_duties_raises_exception(mocker):
+    mocker.patch(
+        "models.duty.api_session.get",
+        side_effect=requests.RequestException("Network Error")
+    )
+    duties = Duty.fetch_duties_from_backend()
+    assert duties == []
+
+
+# FETCH DUTY BY DUTY CODE
 def test_fetch_duty_success(mock_api_session_get):
     response_data = {
         "id": "1",
@@ -91,7 +118,7 @@ def test_create_duty_success(mock_api_session_post):
     }
     mock_api_session_post(response_data)
 
-    duty = Duty.create_duty(
+    duty, error = Duty.create_duty(
         "D10",
         "Duty 10",
         "Duty 10 Description",
@@ -99,6 +126,7 @@ def test_create_duty_success(mock_api_session_post):
         ksb_codes=["K1", "S1"]
     )
 
+    assert error is None
     assert duty.id == "2"
     assert duty.code == "D10"
     assert duty.coins == response_data["coins"]
@@ -107,8 +135,10 @@ def test_create_duty_success(mock_api_session_post):
 
 def test_create_duty_returns_none_on_error(mocker):
     mocker.patch("models.duty.api_session.post", side_effect=requests.RequestException("Error"))
-    duty = Duty.create_duty("D1", "Fail Duty", "Fail Description")
+    duty, error = Duty.create_duty("D1", "Fail Duty", "Fail Description")
+
     assert duty is None
+    assert error == "Server error while creating duty"
 
 
 # UPDATE DUTY
@@ -123,7 +153,7 @@ def test_update_duty_success(mock_api_session_patch):
     }
     mock_api_session_patch(response_data)
 
-    duty = Duty.update_duty(
+    duty, error = Duty.update_duty(
         code="D3",
         name="Updated Duty",
         description="Updated Description",
@@ -131,6 +161,7 @@ def test_update_duty_success(mock_api_session_patch):
         ksb_codes=["K2", "S2"]
     )
 
+    assert error is None
     assert duty.name == "Updated Duty"
     assert duty.description == "Updated Description"
     assert duty.coins == response_data["coins"]
@@ -141,7 +172,9 @@ def test_update_duty_partial_update(mock_api_session_patch):
     response_data = {"id": "4", "code": "D4", "name": "Name Only", "description": "", "coins": [], "ksbs": []}
     mock_api_session_patch(response_data)
 
-    duty = Duty.update_duty(code="D4", name="Name Only")
+    duty, error = Duty.update_duty(code="D4", name="Name Only")
+
+    assert error is None
     assert duty.name == "Name Only"
     assert duty.description == ""
     assert duty.coins == []
@@ -150,7 +183,9 @@ def test_update_duty_partial_update(mock_api_session_patch):
 
 def test_update_duty_returns_none_on_error(mocker):
     mocker.patch("models.duty.api_session.patch", side_effect=requests.RequestException("Error"))
-    duty = Duty.update_duty("D5", name="Fail Update")
+    duty, error = Duty.update_duty("D5", name="Fail Update")
+
+    assert error == 'Server error while updating duty'
     assert duty is None
 
 

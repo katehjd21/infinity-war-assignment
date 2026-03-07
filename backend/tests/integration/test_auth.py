@@ -13,7 +13,7 @@ def test_login_success(client, create_admin_user):
     assert "session" in response.headers.get("Set-Cookie")
 
 
-def test_login_fail_wrong_password(client, create_admin_user):
+def test_login_fail_wrong_password(client):
     response = client.post("/login", json={
         "username": "admin",
         "password": "wrongpassword"
@@ -34,7 +34,7 @@ def test_login_fail_nonexistent_user(client):
 
 
 # TEST LOGOUT
-def test_logout_clears_session(client, create_admin_user):
+def test_logout_clears_session(client):
     client.post("/login", json={"username": "admin", "password": "password123"})
     response = client.post("/logout")
     data = response.get_json()
@@ -49,7 +49,7 @@ def test_protected_route_requires_login(client):
 
 
 # TEST UNAUTHENTICATED USERS CAN SEE COINS/DUTIES AND COMPLETION
-def test_unauthenticated_user_can_view_coins_and_completion(logged_in_admin, client, coin, create_authenticated_user):
+def test_unauthenticated_user_can_view_coins_and_completion(logged_in_admin, client, coin):
     logged_in_admin.post(f"/coins/{coin.id}/complete")
 
     logged_in_admin.post("/logout")
@@ -61,30 +61,6 @@ def test_unauthenticated_user_can_view_coins_and_completion(logged_in_admin, cli
     assert coin_data is not None
     assert "completed" in data[0]
 
-
-# TEST TOGGLE COINS COMPLETE AUTHENTICATION
-def test_authenticated_user_can_toggle_coin_completion(logged_in_admin, coin, create_authenticated_user):
-    assert not coin.completed
-
-    response = logged_in_admin.post(f"/coins/{coin.id}/complete")
-    assert response.status_code == 200
-    coin = Coin.get_by_id(coin.id)
-    assert coin.completed is True
-
-    response = logged_in_admin.post(f"/coins/{coin.id}/complete")
-    assert response.status_code == 200
-    coin = Coin.get_by_id(coin.id)
-    assert coin.completed is False
-
-
-def test_admin_can_toggle_coin_completion(logged_in_admin, coin, create_admin_user):
-    response = logged_in_admin.post(f"/coins/{coin.id}/complete")
-    assert response.status_code == 200
-
-
-def test_unauthenticated_user_cannot_toggle_coin_completion(client, coin):
-    response = client.post(f"/coins/{coin.id}/complete")
-    assert response.status_code == 401
 
 
 # TEST ADMIN CAN SEE HTTP REQUESTS

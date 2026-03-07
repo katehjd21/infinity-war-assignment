@@ -32,7 +32,7 @@ def test_patch_coin_returns_400_if_invalid_id_v1(client):
     response = client.patch("/v1/coins/invalid_id", json={"name": "Updated Coin Name"})
 
     assert response.status_code == 400
-    assert response.json["description"] == "Invalid Coin ID format. Coin ID must be a UUID (non-integer)."
+    assert response.json["description"] == "Invalid Coin ID: invalid_id. Coin ID must be a UUID (non-integer)."
 
 
 def test_patch_coin_returns_404_if_not_found_v1(client):
@@ -134,7 +134,7 @@ def test_patch_coin_returns_400_if_invalid_id_v2(client):
     response = client.patch("/v2/coins/invalid_id", json={"name": "Updated Coin Name"})
 
     assert response.status_code == 400
-    assert response.json["description"] == "Invalid Coin ID format. Coin ID must be a UUID (non-integer)."
+    assert response.json["description"] == "Invalid Coin ID: invalid_id. Coin ID must be a UUID (non-integer)."
 
 
 def test_patch_coin_returns_400_for_invalid_duty_id_v2(client, coin):

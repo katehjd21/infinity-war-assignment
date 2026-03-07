@@ -1,4 +1,4 @@
-Reset & base
+/* Base and reset */
 * {
     margin: 0;
     padding: 0;
@@ -73,8 +73,58 @@ h2 {
     color: #334155;
 }
 
-/* Landing Page */
+.inline-form {
+    display: inline;
+}
 
+.flash-messages {
+    margin: 10px auto;
+    width: 90%;
+}
+
+.flash {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.flash.error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+}
+
+.flash.success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.user-info {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.session-expired-banner {
+    background-color: #ffdddd;
+    color: #800000;
+    border: 1px solid #ffaaaa;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.session-expired-banner a {
+    color: #800000;
+    text-decoration: underline;
+    font-weight: normal;
+}
+
+
+/* Landing Page */
 .landing-page .grid,
 .landing-page .card {
     margin-bottom: 50px;
@@ -277,4 +327,165 @@ h2 {
 .back-button.secondary:hover {
     background: #2563eb;
     color: white;
+}
+
+/* Forms */
+.form-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px 15px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #334155;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Coin checkboxes */
+.coin-checkboxes {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.coin-checkboxes label {
+    display: block;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+/* Buttons */
+.save-button {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.save-button:hover {
+    background: #1d4ed8;
+}
+
+/* Admin Table Pages */
+.admin-page h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+}
+
+.admin-page a.create-new {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 18px;
+    border-radius: 50px;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.admin-page a.create-new:hover {
+    background: #1d4ed8;
+}
+
+.admin-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 50px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.admin-page th,
+.admin-page td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+}
+
+.admin-page th {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: #334155;
+}
+
+.admin-page tr:hover {
+    background: #f8fafc;
+}
+
+.admin-page td form {
+    display: inline;
+}
+
+.admin-page td form button,
+.admin-page td a.edit-button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 6px;
+}
+
+.admin-page td a.edit-button {
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+}
+
+.admin-page td a.edit-button:hover {
+    background: #1d4ed8;
+}
+
+.admin-page td form button.delete-button {
+    background: #ef4444;
+    color: white;
+}
+
+.admin-page td form button.delete-button:hover {
+    background: #b91c1c;
+}
+
+.admin-page .back-link {
+    display: inline-block;
+    margin-top: 20px;
 }

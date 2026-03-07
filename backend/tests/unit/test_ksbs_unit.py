@@ -74,11 +74,13 @@ def test_duty_has_all_ksbs(duty_with_ksbs):
     assert len(list(duty.duty_skills)) == 1
     assert len(list(duty.duty_behaviours)) == 1
 
+
 def test_update_knowledge_code(duty_with_ksbs):
     knowledge = list(duty_with_ksbs.duty_knowledges)[0].knowledge
     knowledge.code = "K25"
     knowledge.save()
     assert Knowledge.get_by_id(knowledge.id).code == "K25"
+
 
 def test_update_knowledge_name(duty_with_ksbs):
     knowledge = list(duty_with_ksbs.duty_knowledges)[0].knowledge
@@ -86,16 +88,19 @@ def test_update_knowledge_name(duty_with_ksbs):
     knowledge.save()
     assert Knowledge.get_by_id(knowledge.id).name == "Updated Knowledge Name"
 
+
 def test_update_knowledge_description(duty_with_ksbs):
     knowledge = list(duty_with_ksbs.duty_knowledges)[0].knowledge
     knowledge.description = "Updated Knowledge Description"
     knowledge.save()
     assert Knowledge.get_by_id(knowledge.id).description == "Updated Knowledge Description"
 
+
 def test_deleting_knowledge_cleans_junction(duty_with_ksbs):
     knowledge = list(duty_with_ksbs.duty_knowledges)[0].knowledge
     knowledge.delete_instance(recursive=True)
     assert DutyKnowledge.select().where(DutyKnowledge.knowledge == knowledge.id).count() == 0
+
 
 def test_duties_for_given_knowledge(duty_with_ksbs):
     knowledge = list(duty_with_ksbs.duty_knowledges)[0].knowledge
@@ -104,12 +109,14 @@ def test_duties_for_given_knowledge(duty_with_ksbs):
         duties.append(duty_knowledge.duty)
     assert duty_with_ksbs in duties
 
+
 def test_duties_for_given_skill(duty_with_ksbs):
     skill = list(duty_with_ksbs.duty_skills)[0].skill
     duties = []
     for duty_skill in skill.skill_duties:
         duties.append(duty_skill.duty)
     assert duty_with_ksbs in duties
+
 
 def test_duties_for_given_behaviour(duty_with_ksbs):
     behaviour = list(duty_with_ksbs.duty_behaviours)[0].behaviour

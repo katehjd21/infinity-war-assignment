@@ -104,7 +104,7 @@ def test_post_duty_returns_400_if_missing_code(client):
     })
 
     assert response.status_code == 400
-    assert response.json["description"] == "Missing 'code' key in request body."
+    assert response.json["description"] == "Duty code cannot be empty."
 
 
 def test_post_duty_returns_400_if_invalid_code_format(client):

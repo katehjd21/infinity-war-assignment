@@ -156,9 +156,11 @@ def test_create_coin_with_duties_success(mock_api_session_post):
         "completed": False
     }
     mock_post = mock_api_session_post(response_data)
-    coin = Coin.create_coin("Newly Created Coin", duty_codes=["D2"])
+    coin, error = Coin.create_coin("Newly Created Coin", duty_codes=["D2"])
+
     expected_url = "http://localhost:5000/v3/coins"
     mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": ["D2"]})
+    assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == response_data["duties"]
     assert coin.completed is False
@@ -172,9 +174,10 @@ def test_create_coin_without_duties_success(mock_api_session_post):
         "completed": False
     }
     mock_post = mock_api_session_post(response_data)
-    coin = Coin.create_coin("Newly Created Coin", duty_codes=[])
+    coin, error = Coin.create_coin("Newly Created Coin", duty_codes=[])
     expected_url = "http://localhost:5000/v3/coins"
     mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": []})
+    assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == []
     assert coin.completed is False
@@ -185,8 +188,9 @@ def test_create_coin_returns_none_on_error(mocker):
         "models.coin.api_session.post",
         side_effect=requests.RequestException("Network Error")
     )
-    coin = Coin.create_coin("Failed Coin")
+    coin, error = Coin.create_coin("Failed Coin")
     assert coin is None
+    assert error == "Server error while creating coin"
 
 
 # UPDATE COIN
@@ -198,13 +202,14 @@ def test_update_coin_success(mock_api_session_patch):
         "completed": True
     }
     mock_patch = mock_api_session_patch(response_data)
-    coin = Coin.update_coin(
+    coin, error = Coin.update_coin(
         coin_id=response_data["id"],
         name="Updated Coin",
         duty_codes=["D3"]
     )
     expected_url = f"http://localhost:5000/v3/coins/{response_data['id']}"
     mock_patch.assert_called_with(expected_url, json={"name": "Updated Coin", "duty_codes": ["D3"]})
+    assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == response_data["duties"]
     assert coin.completed is True
@@ -220,7 +225,7 @@ def test_update_coin_name_only(mock_api_session_patch):
 
     mock_patch = mock_api_session_patch(response_data)
 
-    coin = Coin.update_coin(
+    coin, error = Coin.update_coin(
         coin_id=response_data["id"],
         name="Updated Name"
     )
@@ -230,6 +235,7 @@ def test_update_coin_name_only(mock_api_session_patch):
         json={"name": "Updated Name"}
     )
 
+    assert error is None
     assert coin.name == "Updated Name"
 
 
@@ -243,7 +249,7 @@ def test_update_coin_duties_only(mock_api_session_patch):
 
     mock_patch = mock_api_session_patch(response_data)
 
-    coin = Coin.update_coin(
+    coin, error = Coin.update_coin(
         coin_id=response_data["id"],
         duty_codes=["D1"]
     )
@@ -253,6 +259,7 @@ def test_update_coin_duties_only(mock_api_session_patch):
         json={"duty_codes": ["D1"]}
     )
 
+    assert error is None
     assert coin.duties == ["D1"]
 
 
@@ -261,8 +268,9 @@ def test_update_coin_returns_none_on_error(mocker):
         "models.coin.api_session.patch",
         side_effect=requests.RequestException("Network Error")
     )
-    coin = Coin.update_coin("invalid_id", name="Failed Update Coin")
+    coin, error = Coin.update_coin("invalid_id", name="Failed Update Coin")
     assert coin is None
+    assert error == "Server error while updating coin"
 
 
 # DELETE COIN

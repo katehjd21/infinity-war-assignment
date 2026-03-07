@@ -21,10 +21,21 @@
     <p class="muted">No coins associated with this duty.</p>
     {% endif %}
 
+    <h2>KSB Codes</h2>
+    {% if duty.ksbs %}
+    <div class="grid">
+        {% for ksb in duty.ksbs %}
+        <div class="card">{{ ksb }}</div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="muted">No KSB codes for this duty.</p>
+    {% endif %}
+
     <div class="button-row">
         {% if coin_id %}
             <a class="back-button secondary" href="{{ url_for('coin_page', coin_id=coin_id, testing=request.args.get('testing'), fixture=request.args.get('fixture')) }}">
-                    ← Back to coin
+                ← Back to coin
             </a>
         {% endif %}
         <a class="back-button primary" href="{{ url_for('landing_page', testing=request.args.get('testing'), fixture=request.args.get('fixture')) }}">
