@@ -109,7 +109,7 @@ def login_page():
 
 
 @app.route("/logout", methods=["POST"])
-def logout_page():
+def logout():
     api_session.post("http://localhost:5000/logout")
     session.clear()
     flash("You have been logged out.", "success")

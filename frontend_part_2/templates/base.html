@@ -13,7 +13,7 @@
             <nav>
                 {% if session.get('username') %}
                     <span class="user-info">Logged in as {{ session.username }} ({{ session.role }})</span>
-                    <form method="POST" action="{{ url_for('logout_page') }}" class="inline-form">
+                    <form method="POST" action="{{ url_for('logout') }}" class="inline-form">
                         <button type="submit">Logout</button>
                     </form>
 
@@ -42,22 +42,5 @@
     <div class="page-container">
         {% block content %}{% endblock %}
     </div>
-
-    <script>
-        fetch("/api/session_status")
-        .then(response => response.json())
-        .then(data => {
-            if (!data.logged_in) {
-                document.querySelectorAll('a[href^="/admin"]').forEach(el => el.style.display = 'none');
-                document.querySelectorAll('form[action^="/admin"]').forEach(el => el.style.display = 'none');
-
-                let banner = document.createElement('div');
-                banner.classList.add('session-expired-banner');
-                banner.innerHTML = 'Your session has expired. Please <a href="/login">log in</a> again.';
-                document.body.insertBefore(banner, document.body.firstChild);
-            }
-        })
-        .catch(() => {});
-    </script>
 </body>
 </html>

@@ -2,6 +2,8 @@ import pytest
 from app import app
 from models.coin import Coin
 from models.duty import Duty
+from unittest.mock import Mock
+from models.coin import api_session
 
 @pytest.fixture
 def client():
@@ -9,6 +11,27 @@ def client():
     app.secret_key = "test_secret_key"
     with app.test_client() as client:
         yield client
+
+@pytest.fixture(autouse=True)
+def mock_api_requests(mocker):
+    mock_get = Mock()
+    mock_get.json.return_value = []
+    mock_get.raise_for_status.return_value = None
+    mocker.patch.object(api_session, "get", return_value=mock_get)
+
+    mock_post = Mock()
+    mock_post.json.return_value = {"message": "success"}
+    mock_post.raise_for_status.return_value = None
+    mocker.patch.object(api_session, "post", return_value=mock_post)
+
+    mock_delete = Mock()
+    mock_delete.raise_for_status.return_value = None
+    mocker.patch.object(api_session, "delete", return_value=mock_delete)
+
+    mock_patch = Mock()
+    mock_patch.json.return_value = {"message": "success"}
+    mock_patch.raise_for_status.return_value = None
+    mocker.patch.object(api_session, "patch", return_value=mock_patch)
 
 @pytest.fixture
 def mocked_coin():

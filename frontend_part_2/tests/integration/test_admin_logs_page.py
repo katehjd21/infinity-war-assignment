@@ -11,7 +11,8 @@ def mock_admin_logs(mocker):
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = mock_logs
-    mocker.patch("requests.get", return_value=mock_response)
+    mock_response.raise_for_status.return_value = None
+    mocker.patch("models.coin.api_session.get", return_value=mock_response)
     return mock_logs
 
 
@@ -25,7 +26,8 @@ def test_admin_logs_page_as_admin(mocker, logged_in_admin_user, mock_admin_logs)
         assert log["method"] in html
         assert log["path"] in html
         assert log["user"] in html
-        assert log["timestamp"] in html
+        rendered_timestamp = log["timestamp"].replace("T", " ")[:19]
+        assert rendered_timestamp in html
 
 
 def test_admin_logs_page_unauthorized(logged_in_authenticated_user):

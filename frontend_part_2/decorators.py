@@ -8,9 +8,11 @@ def login_required(role=None):
             if not session.get("username"):
                 flash("You must be logged in to access this page.", "error")
                 return redirect(url_for("login_page"))
+
             if role and session.get("role") != role:
                 flash("You do not have permission to access this page.", "error")
                 return redirect(url_for("landing_page"))
+
             return f(*args, **kwargs)
         return decorated_function
     return decorator

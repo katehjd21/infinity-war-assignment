@@ -29,7 +29,7 @@
             {% for coin in all_coins %}
                 <label>
                     <input type="checkbox" name="coin_ids" value="{{ coin.id }}"
-                    {% if duty and coin.id in duty.coin_ids %}checked{% endif %}>
+                    {% if duty and coin.id in duty.assigned_coin_ids %}checked{% endif %}>
                     {{ coin.name }}
                 </label>
             {% endfor %}

@@ -64,10 +64,6 @@ class CoinHelper:
 
         duty_codes = data.get("duty_codes", []) if with_duties else []
 
-        for code in duty_codes:
-            if not Duty.select().where(Duty.code == code.upper()).exists():
-                abort(400, description=f"Duty with code '{code}' does not exist.")
-
         try:
             with database.atomic():
                 coin = Coin.create(name=name, completed=completed)
