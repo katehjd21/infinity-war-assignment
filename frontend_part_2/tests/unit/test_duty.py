@@ -1,51 +1,10 @@
-import pytest
-from unittest.mock import Mock
-from models.duty import Duty
 import requests
+from models.duty import Duty
 
-
-@pytest.fixture
-def mock_api_session_get(mocker):
-    def _mock(response_data):
-        mock_response = Mock()
-        mock_response.json.return_value = response_data
-        mock_response.raise_for_status.return_value = None
-        mocker.patch("models.duty.api_session.get", return_value=mock_response)
-    return _mock
-
-
-@pytest.fixture
-def mock_api_session_post(mocker):
-    def _mock(response_data):
-        mock_response = Mock()
-        mock_response.json.return_value = response_data
-        mock_response.raise_for_status.return_value = None
-        mocker.patch("models.duty.api_session.post", return_value=mock_response)
-    return _mock
-
-
-@pytest.fixture
-def mock_api_session_patch(mocker):
-    def _mock(response_data):
-        mock_response = Mock()
-        mock_response.json.return_value = response_data
-        mock_response.raise_for_status.return_value = None
-        mocker.patch("models.duty.api_session.patch", return_value=mock_response)
-    return _mock
-
-
-@pytest.fixture
-def mock_api_session_delete(mocker):
-    def _mock(return_value=True):
-        mock_response = Mock()
-        mock_response.raise_for_status.return_value = None
-        mocker.patch("models.duty.api_session.delete", return_value=mock_response)
-        return mock_response
-    return _mock
 
 # FETCH ALL DUTIES
 def test_fetch_all_duties_from_backend(mocked_duties_response, mock_api_session_get):
-    mock_api_session_get(mocked_duties_response)
+    mock_api_session_get("models.duty", mocked_duties_response)
     duties = Duty.fetch_duties_from_backend()
     assert len(duties) == len(mocked_duties_response)
 
@@ -57,7 +16,7 @@ def test_fetch_all_duties_from_backend(mocked_duties_response, mock_api_session_
 
 
 def test_fetch_empty_duties_list_from_backend(mock_api_session_get):
-    mock_api_session_get([])
+    mock_api_session_get("models.duty", [])
     duties = Duty.fetch_duties_from_backend()
     assert duties == []
 
@@ -81,7 +40,7 @@ def test_fetch_duty_success(mock_api_session_get):
         "coins": [{"id": "C1", "name": "Automate"}],
         "ksbs": ["K1", "S1"]
     }
-    mock_api_session_get(response_data)
+    mock_api_session_get("models.duty", response_data)
 
     duty = Duty.fetch_duty_from_backend("D1")
     assert duty.code == "D1"
@@ -92,7 +51,7 @@ def test_fetch_duty_success(mock_api_session_get):
 
 def test_fetch_duty_defaults_for_missing_fields(mock_api_session_get):
     response_data = {"code": "D2", "name": "Duty 2", "description": "Duty 2 Description"}
-    mock_api_session_get(response_data)
+    mock_api_session_get("models.duty", response_data)
 
     duty = Duty.fetch_duty_from_backend("D2")
     assert duty.code == "D2"
@@ -116,7 +75,7 @@ def test_create_duty_success(mock_api_session_post):
         "coins": [{"id": "C1", "name": "Automate"}],
         "ksbs": ["K1", "S1"]
     }
-    mock_api_session_post(response_data)
+    mock_api_session_post("models.duty", response_data)
 
     duty, error = Duty.create_duty(
         "D10",
@@ -151,7 +110,7 @@ def test_update_duty_success(mock_api_session_patch):
         "coins": [{"id": "C2", "name": "Houston"}],
         "ksbs": ["K2", "S2"]
     }
-    mock_api_session_patch(response_data)
+    mock_api_session_patch("models.duty", response_data)
 
     duty, error = Duty.update_duty(
         code="D3",
@@ -170,7 +129,7 @@ def test_update_duty_success(mock_api_session_patch):
 
 def test_update_duty_partial_update(mock_api_session_patch):
     response_data = {"id": "4", "code": "D4", "name": "Name Only", "description": "", "coins": [], "ksbs": []}
-    mock_api_session_patch(response_data)
+    mock_api_session_patch("models.duty", response_data)
 
     duty, error = Duty.update_duty(code="D4", name="Name Only")
 
@@ -191,7 +150,7 @@ def test_update_duty_returns_none_on_error(mocker):
 
 # DELETE DUTY
 def test_delete_duty_success(mock_api_session_delete):
-    mock_api_session_delete()
+    mock_api_session_delete("models.duty", None)
     result = Duty.delete_duty("D1")
     assert result is True
 

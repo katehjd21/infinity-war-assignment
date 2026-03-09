@@ -12,26 +12,55 @@ def client():
     with app.test_client() as client:
         yield client
 
+
 @pytest.fixture(autouse=True)
-def mock_api_requests(mocker):
-    mock_get = Mock()
-    mock_get.json.return_value = []
-    mock_get.raise_for_status.return_value = None
-    mocker.patch.object(api_session, "get", return_value=mock_get)
+def set_backend_url(monkeypatch):
+    monkeypatch.setenv("BACKEND_URL", "http://localhost:5000")
+    
 
-    mock_post = Mock()
-    mock_post.json.return_value = {"message": "success"}
-    mock_post.raise_for_status.return_value = None
-    mocker.patch.object(api_session, "post", return_value=mock_post)
+@pytest.fixture
+def mock_api_session_get(mocker):
+    def _mock(module_path, response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        patched_mock = mocker.patch(f"{module_path}.api_session.get", return_value=mock_response)
+        return patched_mock
+    return _mock
 
-    mock_delete = Mock()
-    mock_delete.raise_for_status.return_value = None
-    mocker.patch.object(api_session, "delete", return_value=mock_delete)
 
-    mock_patch = Mock()
-    mock_patch.json.return_value = {"message": "success"}
-    mock_patch.raise_for_status.return_value = None
-    mocker.patch.object(api_session, "patch", return_value=mock_patch)
+@pytest.fixture
+def mock_api_session_post(mocker):
+    def _mock(module_path, response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        patched_mock = mocker.patch(f"{module_path}.api_session.post", return_value=mock_response)
+        return patched_mock
+    return _mock
+
+
+@pytest.fixture
+def mock_api_session_patch(mocker):
+    def _mock(module_path, response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        patched_mock = mocker.patch(f"{module_path}.api_session.patch", return_value=mock_response)        
+        return patched_mock
+    return _mock
+
+
+@pytest.fixture
+def mock_api_session_delete(mocker):
+    def _mock(module_path, response_data):
+        mock_response = Mock()
+        mock_response.json.return_value = response_data
+        mock_response.raise_for_status.return_value = None
+        patched_mock = mocker.patch(f"{module_path}.api_session.delete", return_value=mock_response)
+        return patched_mock
+    return _mock
+
 
 @pytest.fixture
 def mocked_coin():
@@ -215,7 +244,7 @@ def logged_in_authenticated_user(client):
     with client.session_transaction() as session:
         session["username"] = "test_authenticated_user"
         session["role"] = "authenticated"
-    return client
+    yield client
 
 
 @pytest.fixture
@@ -223,4 +252,4 @@ def logged_in_admin_user(client):
     with client.session_transaction() as session:
         session["username"] = "test_admin_user"
         session["role"] = "admin"
-    return client
+    yield client

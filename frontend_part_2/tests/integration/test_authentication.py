@@ -19,10 +19,13 @@ def test_login_invalid_credentials(mocker, client):
     assert "Invalid username or password" in html
 
 # LOGOUT TESTS
-def test_logout_clears_session(logged_in_authenticated_user):
+def test_logout_clears_session(mock_api_session_post, logged_in_authenticated_user):
+    mock_api_session_post("app", {"message": "Logged out"})
+
     client = logged_in_authenticated_user
     response = client.post("/logout", follow_redirects=True)
     html = response.data.decode()
+
     assert "Login" in html
     with client.session_transaction() as sess:
         assert sess.get("username") is None

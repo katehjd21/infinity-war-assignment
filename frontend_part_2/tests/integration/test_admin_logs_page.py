@@ -38,8 +38,9 @@ def test_admin_logs_page_unauthorized(logged_in_authenticated_user):
     assert response.headers["Location"].endswith("/")
 
 
+
 def test_admin_logs_page_server_error(mocker, logged_in_admin_user):
-    mocker.patch("requests.get", side_effect=requests.RequestException("Server error"))
+    mocker.patch("models.coin.api_session.get", side_effect=requests.RequestException("Server error"))
 
     response = logged_in_admin_user.get("/admin/logs")
     html = response.data.decode()

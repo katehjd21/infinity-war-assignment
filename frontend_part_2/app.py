@@ -10,6 +10,7 @@ import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
 
 @app.route('/')
@@ -86,7 +87,7 @@ def login_page():
 
         try:
             response = api_session.post(
-                "http://localhost:5000/login",
+                f"http://{BACKEND_URL}/login",
                 json={"username": username, "password": password},
                 timeout=5
             )
@@ -110,7 +111,7 @@ def login_page():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    api_session.post("http://localhost:5000/logout")
+    api_session.post(f"http://{BACKEND_URL}/logout")
     session.clear()
     flash("You have been logged out.", "success")
     return redirect("/")
@@ -283,18 +284,15 @@ def admin_delete_duty(duty_code):
 @app.route("/admin/logs")
 @admin_required
 def admin_logs_page():
+    logs = []
     try:
-        response = api_session.get("http://localhost:5000/admin/logs")
+        response = api_session.get(f"{BACKEND_URL}/admin/logs")
         response.raise_for_status()
-
         logs = response.json()
-
-        return render_template("admin_logs.html", logs=logs)
-
     except requests.exceptions.RequestException:
-        session.clear()
-        flash("Your session has expired. Please log in again.", "error")
-        return redirect(url_for("login_page"))
+        flash("Could not load logs from backend.", "error")
+    
+    return render_template("admin_logs.html", logs=logs)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

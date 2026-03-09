@@ -1,5 +1,8 @@
 import requests
 from api_session import api_session
+import os
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
 class Duty:
     def __init__(self, code, name, description, id=None, coins=None, ksbs=None):
@@ -14,7 +17,7 @@ class Duty:
     @classmethod
     def fetch_duties_from_backend(cls):
         try:
-            response = api_session.get("http://localhost:5000/v2/duties")
+            response = api_session.get(f"http://{BACKEND_URL}/v2/duties")
             response.raise_for_status()
             duty_data = response.json()
             return [
@@ -36,7 +39,7 @@ class Duty:
     @classmethod
     def fetch_duty_from_backend(cls, code):
         try:
-            response = api_session.get(f"http://localhost:5000/duties/{code}")
+            response = api_session.get(f"http://{BACKEND_URL}/duties/{code}")
             response.raise_for_status()
             data = response.json()
             return cls(
@@ -55,7 +58,7 @@ class Duty:
     def create_duty(cls, code, name, description, coin_ids=None, ksb_codes=None):
         try:
             response = api_session.post(
-                "http://localhost:5000/v2/duties",
+                f"http://{BACKEND_URL}/v2/duties",
                 json={
                     "code": code,
                     "name": name,
@@ -102,7 +105,7 @@ class Duty:
                 request_body["ksb_codes"] = ksb_codes
 
             response = api_session.patch(
-                f"http://localhost:5000/v2/duties/{code}",
+                f"http://{BACKEND_URL}/v2/duties/{code}",
                 json=request_body
             )
             response.raise_for_status()
@@ -131,7 +134,7 @@ class Duty:
     @classmethod
     def delete_duty(cls, code):
         try:
-            response = api_session.delete(f"http://localhost:5000/v2/duties/{code}")
+            response = api_session.delete(f"http://{BACKEND_URL}/v2/duties/{code}")
             response.raise_for_status()
             return True
         except requests.RequestException as e:
