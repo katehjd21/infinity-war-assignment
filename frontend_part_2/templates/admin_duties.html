@@ -41,10 +41,12 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{{ url_for('admin_edit_duty', duty_code=duty.code) }}" class="edit-button">Edit</a>
-                    <form method="POST" action="{{ url_for('admin_delete_duty', duty_code=duty.code) }}">
-                        <button type="submit" class="delete-button">Delete</button>
-                    </form>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('admin_edit_duty', duty_code=duty.code) }}" class="edit-button">Edit</a>
+                        <form method="POST" action="{{ url_for('admin_delete_duty', duty_code=duty.code) }}">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}

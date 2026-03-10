@@ -22,7 +22,7 @@ def load_fixture(filename, folder="cypress/fixtures"):
 def login_api_session(username, password):
     try:
         resp = api_session.post(
-            f"http://{BACKEND_URL}/login",
+            f"{BACKEND_URL}/login",
             json={"username": username, "password": password},
             timeout=5
         )

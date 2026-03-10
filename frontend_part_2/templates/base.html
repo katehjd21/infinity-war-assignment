@@ -9,7 +9,11 @@
 <body>
     <header>
         <div class="header-container">
-            <a href="{{ url_for('landing_page') }}" class="logo">💰 Coins</a>
+            <a href="{{ url_for('landing_page') }}" class="logo">
+                <span class="logo-icon">💰</span>
+                <span class="logo-text">Coins</span>
+            </a>
+
             <nav>
                 {% if session.get('username') %}
                     <span class="user-info">Logged in as {{ session.username }} ({{ session.role }})</span>
@@ -42,5 +46,31 @@
     <div class="page-container">
         {% block content %}{% endblock %}
     </div>
+
+    {% if session.get('username') %}
+    <script>
+        const timeoutDuration = 15 * 60 * 1000; 
+
+        let idleTimer = setTimeout(forceLogout, timeoutDuration);
+
+        function forceLogout() {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ url_for('logout') }}";
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function resetTimer() {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(forceLogout, timeoutDuration);
+        }
+
+        window.onmousemove = resetTimer;
+        window.onmousedown = resetTimer;
+        window.onkeypress = resetTimer;
+        window.onclick = resetTimer;
+    </script>
+    {% endif %}
 </body>
 </html>

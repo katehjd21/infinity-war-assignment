@@ -18,13 +18,13 @@ class CoinController:
 
 
     @staticmethod
-    def create_coin(name, duty_codes=None):
-        return Coin.create_coin(name, duty_codes)
+    def create_coin(name, duty_codes=None, completed=False):
+        return Coin.create_coin(name, duty_codes, completed)
 
 
     @staticmethod
-    def update_coin(coin_id, name=None, duty_codes=None):
-        return Coin.update_coin(coin_id, name, duty_codes)
+    def update_coin(coin_id, name=None, duty_codes=None, completed=False):
+        return Coin.update_coin(coin_id, name, duty_codes, completed)
 
 
     @staticmethod

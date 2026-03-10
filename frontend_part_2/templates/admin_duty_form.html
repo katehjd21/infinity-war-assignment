@@ -10,7 +10,7 @@
 
     <div class="form-group">
         <label for="code">Duty Code</label>
-        <input type="text" name="code" id="code" value="{{ duty.code if duty else '' }}" required {% if duty %}readonly{% endif %}>
+        <input type="text" name="code" id="code" value="{{ duty.code if duty else '' }}" required {% if duty and duty.id %}readonly{% endif %}>
     </div>
 
     <div class="form-group">

@@ -18,8 +18,30 @@
         <input type="text" name="duty_codes" id="duty_codes" value="{{ coin.duties|map(attribute='code')|join(',') if coin else '' }}">
     </div>
 
+    <div class="form-group">
+        <label for="completed">Completed</label>
+
+        <label class="toggle-switch">
+            <input type="checkbox" name="completed" id="completed" {% if coin and coin.completed %}checked{% endif %}>
+            <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="completed-label">
+            {{ "Completed" if coin and coin.completed else "Not completed" }}
+        </span>
+    </div>
+
     <button type="submit" class="save-button">Save</button>
 </form>
 
 <a href="{{ url_for('admin_coins_page') }}" class="back-link">Back to Coins</a>
+
+<script>
+const checkbox = document.getElementById('completed');
+const label = document.getElementById('completed-label');
+
+checkbox.addEventListener('change', () => {
+    label.textContent = checkbox.checked ? 'Completed' : 'Not completed';
+});
+</script>
+
 {% endblock %}

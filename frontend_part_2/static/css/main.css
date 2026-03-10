@@ -1,4 +1,4 @@
-/* Base and reset */
+/* Base  */
 * {
     margin: 0;
     padding: 0;
@@ -20,42 +20,110 @@ body {
 
 
 header {
-    background-color: #f8f9fa;
-    padding: 10px 20px;
+    background-color: #ffffff;
+    padding: 12px 24px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 2px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 header .header-container {
+    width: 100%;
+    max-width: 1200px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-}
-
-header nav a, 
-header nav button {
-    margin-left: 10px;
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.95rem;
-}
-
-header nav form {
-    display: inline;
 }
 
 header .logo {
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 1.6rem;
     color: #2563eb;
     text-decoration: none;
-    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+    transition: transform 0.2s ease;
+}
+
+header .logo:hover {
+    transform: scale(1.05);
+}
+
+header .logo-icon {
+    font-size: 2rem;
+    margin-right: 6px;
+    display: inline-flex;
+    align-items: center;
+}
+
+header .logo-text {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+header nav a,
+header nav button {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+header nav a:hover,
+header nav button:hover {
+    background-color: #e0e7ff;
+    color: #1e40af;
+}
+
+header nav button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.user-info {
+    font-weight: 500;
+    color: #334155;
+    margin-right: 8px;
+    font-size: 0.95rem;
+}
+
+header nav a.admin-link {
+    background-color: #2563eb;
+    color: white;
+}
+
+header nav a.admin-link:hover {
+    background-color: #1e40af;
+}
+
+header nav form.inline-form {
+    display: inline-block;
+}
+
+@media (max-width: 720px) {
+    header .header-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+    header nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
 h1 {
@@ -77,51 +145,11 @@ h2 {
     display: inline;
 }
 
-.flash-messages {
-    margin: 10px auto;
-    width: 90%;
-}
-
-.flash {
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.flash.error {
-    background-color: #f8d7da;
-    color: #842029;
-    border: 1px solid #f5c2c7;
-}
-
-.flash.success {
-    background-color: #d1e7dd;
-    color: #0f5132;
-    border: 1px solid #badbcc;
-}
-
 .user-info {
     margin-right: 10px;
     font-weight: bold;
 }
 
-.session-expired-banner {
-    background-color: #ffdddd;
-    color: #800000;
-    border: 1px solid #ffaaaa;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    text-align: center;
-    font-family: Arial, sans-serif;
-}
-
-.session-expired-banner a {
-    color: #800000;
-    text-decoration: underline;
-    font-weight: normal;
-}
 
 
 /* Landing Page */
@@ -249,18 +277,100 @@ h2 {
 .duty-detail-page {
     max-width: 800px;
     margin: auto;
+    padding: 0 15px;
+}
+
+.duty-detail-page h1 {
+    font-size: 2rem;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #1e293b;
+}
+
+.duty-detail-page h2 {
+    font-size: 1.4rem;
+    margin-top: 40px;
+    margin-bottom: 15px;
+    color: #334155;
+}
+
+.duty-detail-page .description-box {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    line-height: 1.6;
+    margin-bottom: 30px;
 }
 
 .duty-detail-page .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
     margin-bottom: 40px;
 }
 
 .duty-detail-page .card {
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    color: #1e293b;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.duty-detail-page .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.duty-detail-page .card a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.duty-detail-page .card a:hover {
+    text-decoration: underline;
+}
+
+.duty-detail-page .ksb-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.duty-detail-page .ksb-card {
+    display: inline-block;
+    padding: 10px 16px;
+    min-width: 60px;
+    border-radius: 50px;
+    background: rgba(253, 230, 138, 0.8);
+    color: #92400e;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.duty-detail-page .ksb-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 .duty-detail-page .button-row {
     margin-top: 40px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 
@@ -277,6 +387,36 @@ h2 {
 
 
 /* Back links and buttons */
+.primary-button {
+    background-color: #1d4ed8; 
+    color: #ffffff; 
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 0.375rem; 
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.primary-button:hover {
+    background-color: #2563eb; 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.primary-button:active {
+    background-color: #1e40af; 
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.primary-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); 
+}
+
 .button-row {
     margin-top: 50px;
     display: flex;
@@ -352,6 +492,7 @@ h2 {
 }
 
 .form-group input[type="text"],
+.form-group input[type="password"],
 .form-group textarea {
     padding: 10px 12px;
     border-radius: 8px;
@@ -365,7 +506,6 @@ h2 {
     resize: vertical;
 }
 
-/* Coin checkboxes */
 .coin-checkboxes {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -380,7 +520,6 @@ h2 {
     cursor: pointer;
 }
 
-/* Buttons */
 .save-button {
     display: inline-block;
     padding: 10px 20px;
@@ -396,6 +535,52 @@ h2 {
 .save-button:hover {
     background: #1d4ed8;
 }
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #ccc;
+    border-radius: 26px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: 0.3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked + .slider {
+    background-color: #28a745;
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
+
 
 /* Admin Table Pages */
 .admin-page h1 {
@@ -424,34 +609,54 @@ h2 {
 
 .admin-page table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-bottom: 50px;
     background: white;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.admin-page th,
-.admin-page td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
 .admin-page th {
     background: #f1f5f9;
     font-weight: 600;
     color: #334155;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
 }
 
-.admin-page tr:hover {
-    background: #f8fafc;
+.admin-page th,
+.admin-page td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.95rem;
 }
 
-.admin-page td form {
-    display: inline;
+.admin-page tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+.admin-page tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.admin-page tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.admin-page .action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.admin-page .action-buttons form {
+    margin: 0;
 }
 
 .admin-page td form button,
@@ -463,7 +668,6 @@ h2 {
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-right: 6px;
 }
 
 .admin-page td a.edit-button {
@@ -488,4 +692,53 @@ h2 {
 .admin-page .back-link {
     display: inline-block;
     margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+    .admin-page table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* Admin Logs Table */
+.admin-logs-page h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #1e293b;
+}
+
+.admin-logs-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.admin-logs-page thead {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+.admin-logs-page th,
+.admin-logs-page td {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-logs-page tbody tr:nth-child(even) {
+    background-color: rgba(229, 231, 235, 0.4);
+}
+
+.admin-logs-page tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.1);
 }

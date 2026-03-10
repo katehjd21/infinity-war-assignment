@@ -14,7 +14,7 @@ class Coin:
     @classmethod
     def fetch_coins_from_backend(cls):
         try:
-            response = api_session.get(f"http://{BACKEND_URL}/v3/coins")
+            response = api_session.get(f"{BACKEND_URL}/v3/coins")
             response.raise_for_status()
             coins_data = response.json()
             return [
@@ -33,7 +33,7 @@ class Coin:
     @classmethod
     def fetch_coin_from_backend_by_id(cls, coin_id):
         try:
-            response = api_session.get(f"http://{BACKEND_URL}/v3/coins/{coin_id}")
+            response = api_session.get(f"{BACKEND_URL}/v3/coins/{coin_id}")
             response.raise_for_status()
             coin_data = response.json()
             return cls(
@@ -49,7 +49,7 @@ class Coin:
     @classmethod
     def toggle_complete(cls, coin_id):
         try:
-            response = api_session.post(f"http://{BACKEND_URL}/coins/{coin_id}/complete")
+            response = api_session.post(f"{BACKEND_URL}/coins/{coin_id}/complete")
             response.raise_for_status()
             data = response.json()
             if "id" in data:
@@ -66,13 +66,14 @@ class Coin:
     
     
     @classmethod
-    def create_coin(cls, name, duty_codes=None):
+    def create_coin(cls, name, duty_codes=None, completed=False):
         try:
             response = api_session.post(
-                f"http://{BACKEND_URL}/v3/coins",
+                f"{BACKEND_URL}/v3/coins",
                 json={
                     "name": name,
-                    "duty_codes": duty_codes or []
+                    "duty_codes": duty_codes or [],
+                    "completed": completed
                 }
             )
 
@@ -101,7 +102,7 @@ class Coin:
             
     
     @classmethod
-    def update_coin(cls, coin_id, name=None, duty_codes=None):
+    def update_coin(cls, coin_id, name=None, duty_codes=None, completed=False):
         try:
             request_body = {}
 
@@ -110,9 +111,12 @@ class Coin:
 
             if duty_codes is not None:
                 request_body["duty_codes"] = duty_codes
+            
+            if completed is not None:
+                request_body["completed"] = completed
 
             response = api_session.patch(
-                f"http://{BACKEND_URL}/v3/coins/{coin_id}",
+                f"{BACKEND_URL}/v3/coins/{coin_id}",
                 json=request_body
             )
 
@@ -144,7 +148,7 @@ class Coin:
     def delete_coin(cls, coin_id):
         try:
             response = api_session.delete(
-                f"http://{BACKEND_URL}/v2/coins/{coin_id}"
+                f"{BACKEND_URL}/v2/coins/{coin_id}"
             )
             response.raise_for_status()
             return True

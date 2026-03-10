@@ -6,14 +6,22 @@ def login_required(role=None):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             if not session.get("username"):
-                flash("You must be logged in to access this page.", "error")
+                session.clear()
                 return redirect(url_for("login_page"))
 
             if role and session.get("role") != role:
-                flash("You do not have permission to access this page.", "error")
+ 
+                flash("Access denied. Insufficient permissions.", "error")
                 return redirect(url_for("landing_page"))
 
-            return f(*args, **kwargs)
+            try:
+                return f(*args, **kwargs)
+            except Exception as e:
+
+                session.clear()
+                flash("Your session has expired. Please log in again.", "error")
+                return redirect(url_for("login_page"))
+                
         return decorated_function
     return decorator
 

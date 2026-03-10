@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, flash, url_for
+from datetime import timedelta
 from controllers.duty_controller import DutyController
 from controllers.coin_controller import CoinController
 from utils.helpers import login_api_session, load_fixture, is_valid_password, is_valid_username
@@ -12,6 +13,8 @@ import os
    
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=15)
+app.config["SESSION_PERMANENT"] = True
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
 limiter = None
@@ -30,6 +33,12 @@ else:
         default_limits=["200 per day", "50 per hour"],
         storage_uri="memory://"
     )
+
+
+@app.before_request
+def handle_session_persistence():
+    session.permanent = True
+
 
 @app.route('/')
 def landing_page():
@@ -92,11 +101,6 @@ def duty_page(duty_code):
     return render_template("duty_detail.html", duty=duty, coin_id=coin_id)
 
 
-@app.route("/api/session_status")
-def session_status():
-    return {"logged_in": bool(session.get("username"))}
-
-
 @app.route("/login", methods=["GET", "POST"])
 @limiter.limit("5 per minute")
 def login_page():
@@ -128,7 +132,7 @@ def login_page():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    api_session.post(f"http://{BACKEND_URL}/logout")
+    api_session.post(f"{BACKEND_URL}/logout")
     session.clear()
     flash("You have been logged out.", "success")
     return redirect("/")
@@ -155,7 +159,9 @@ def admin_create_coin():
             duty_codes_str = request.form.get("duty_codes", "")
             duty_codes = [d.strip() for d in duty_codes_str.split(",") if d.strip()]
 
-            coin, error = CoinController.create_coin(name, duty_codes=duty_codes)
+            completed = request.form.get("completed") == "on"
+
+            coin, error = CoinController.create_coin(name, duty_codes=duty_codes, completed=completed)
             if coin:
                 flash("Coin created successfully.", "success")
                 return redirect("/admin/coins")
@@ -181,8 +187,12 @@ def admin_edit_coin(coin_id):
             return "Coin not found", 404
         if request.method == "POST":
             name = request.form.get("name")
+
             duty_codes = [d.strip() for d in request.form.get("duty_codes", "").split(",") if d.strip()]
-            updated_coin, error = CoinController.update_coin(coin_id, name=name, duty_codes=duty_codes)
+
+            completed = request.form.get("completed") == "on"
+
+            updated_coin, error = CoinController.update_coin(coin_id, name=name, duty_codes=duty_codes, completed=completed)
             if updated_coin:
                 flash("Coin updated successfully.", "success")
                 return redirect("/admin/coins")

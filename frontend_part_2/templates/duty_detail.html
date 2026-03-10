@@ -23,9 +23,9 @@
 
     <h2>KSB Codes</h2>
     {% if duty.ksbs %}
-    <div class="grid">
+    <div class="ksb-grid">
         {% for ksb in duty.ksbs %}
-        <div class="card">{{ ksb }}</div>
+        <div class="ksb-card">{{ ksb }}</div>
         {% endfor %}
     </div>
     {% else %}
