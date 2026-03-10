@@ -88,7 +88,7 @@ def test_create_coin_invalid_duty_code_raises_abort():
     data = {"name": "Coin Invalid Duty", "duty_codes": ["FAKE DUTY CODE"]}
     with pytest.raises(HTTPException) as e:
         CoinHelper.create_coin(data, with_duties=True)
-    assert "Duty with code 'FAKE DUTY CODE' does not exist" in str(e.value)
+    assert "Invalid duty codes: FAKE DUTY CODE" in str(e.value)
 
 
 def test_create_coin_with_completed_true():

@@ -130,7 +130,7 @@ def test_post_coin_returns_400_if_invalid_duty_code_v2(client):
     })
 
     assert response.status_code == 400
-    assert response.json["description"] == "Duty with code 'NON_EXISTENT_DUTY_CODE' does not exist."
+    assert response.json["description"] == "Invalid duty codes: NON_EXISTENT_DUTY_CODE"
 
 
 # POST COIN V3
