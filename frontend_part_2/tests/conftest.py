@@ -1,9 +1,11 @@
+import os
+os.environ["TESTING"] = "1"
+
 import pytest
 from app import app
 from models.coin import Coin
 from models.duty import Duty
 from unittest.mock import Mock
-from models.coin import api_session
 
 @pytest.fixture
 def client():
@@ -253,3 +255,13 @@ def logged_in_admin_user(client):
         session["username"] = "test_admin_user"
         session["role"] = "admin"
     yield client
+
+
+@pytest.fixture
+def valid_login_data():
+    return {"username": "valid_user", "password": "valid_password"}
+
+
+@pytest.fixture
+def invalid_login_data():
+    return {"username": "invalid_user", "password": "invalid_password"}

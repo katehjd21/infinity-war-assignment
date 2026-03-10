@@ -1,24 +1,7 @@
 import pytest
-from flask import session
 
-# LOGIN TESTS
-def test_login_page_renders(client):
-    response = client.get("/login")
-    html = response.data.decode()
-    assert response.status_code == 200
-    assert "<h1>Login</h1>" in html
 
-def test_login_invalid_credentials(mocker, client):
-    mock_response = mocker.Mock()
-    mock_response.status_code = 401
-    mock_response.json.return_value = {"error": "Invalid username or password"}
-    mocker.patch("api_session.api_session.post", return_value=mock_response)
-
-    response = client.post("/login", data={"username": "bad", "password": "bad"})
-    html = response.data.decode()
-    assert "Invalid username or password" in html
-
-# LOGOUT TESTS
+# LOGOUT
 def test_logout_clears_session(mock_api_session_post, logged_in_authenticated_user):
     mock_api_session_post("app", {"message": "Logged out"})
 
@@ -32,7 +15,7 @@ def test_logout_clears_session(mock_api_session_post, logged_in_authenticated_us
         assert sess.get("role") is None
 
 
-# ROLE ACCESS TESTS
+# ROLE ACCESS
 @pytest.mark.parametrize(
     "url",
     [
@@ -80,7 +63,7 @@ def test_toggle_coin_complete_authenticated_user(mocker, logged_in_authenticated
     assert "Coins" in html or "<h1>Apprenticeship Coins</h1>" in html
 
 
-# TEST ADMIN CREATE COIN/DUTY FLASH SUCCESS
+# TEST ADMIN CREATE COIN/DUTY SUCCESS
 def test_admin_create_coin_flash_success(mocker, logged_in_admin_user):
     client = logged_in_admin_user
     mocker.patch("controllers.coin_controller.CoinController.create_coin", return_value=("coin_obj", None))

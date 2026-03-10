@@ -1,17 +1,35 @@
 from flask import Flask, render_template, request, session, redirect, flash, url_for
 from controllers.duty_controller import DutyController
 from controllers.coin_controller import CoinController
-from utils.utils import login_api_session, load_fixture
+from utils.helpers import login_api_session, load_fixture, is_valid_password, is_valid_username
 from api_session import api_session
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from models.coin import Coin
 from decorators import login_required, admin_required
 import requests
 import os
-
+   
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
+limiter = None
+
+if os.getenv("TESTING"):
+    class DummyLimiter:
+        def limit(self, *args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+    limiter = DummyLimiter()
+else:
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
 
 @app.route('/')
 def landing_page():
@@ -80,29 +98,28 @@ def session_status():
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def login_page():
     if request.method == "POST":
         username = request.form.get("username").strip()
         password = request.form.get("password").strip()
 
+        if not is_valid_username(username) or not is_valid_password(password):
+            flash("Invalid username or password format.", "error")
+            return redirect(url_for("login_page"))
+
         try:
-            response = api_session.post(
-                f"http://{BACKEND_URL}/login",
-                json={"username": username, "password": password},
-                timeout=5
-            )
-            data = response.json()
-            if response.status_code != 200:
-                return render_template("login.html", error=data.get("error", "Invalid credentials"))
+            data = login_api_session(username, password)
+
+            if not data:
+                return render_template("login.html", error="Invalid credentials")
 
             session["role"] = data.get("role")
             session["username"] = username
 
-            if not login_api_session(username, password):
-                return render_template("login.html", error="API session login failed. Try again.")
-
             flash("Logged in successfully.", "success")
             return redirect("/")
+
         except requests.RequestException:
             return render_template("login.html", error="Server error. Try again later.")
 
