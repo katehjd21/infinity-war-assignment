@@ -1,22 +1,26 @@
 import requests
 
-
 def test_login_page_renders(client):
-    response = client.get("/login")
+    response = client.get("/login?testing=1")
     html = response.data.decode()
     assert response.status_code == 200
     assert "<h1>Login</h1>" in html
 
 
-def test_login_page_post_valid_credentials(mocker, client, valid_login_data, mocked_coins):
+def test_login_page_post_valid_credentials(mocker, client, valid_login_data):
     mocker.patch("app.login_api_session", return_value={"role": "authenticated"})
-    mocker.patch("app.CoinController.fetch_all_coins", return_value=mocked_coins)
+
+    mocker.patch(
+    "controllers.coin_controller.CoinController.fetch_all_coins",
+    return_value=[],
+)
 
     response = client.post("/login?testing=1", data=valid_login_data, follow_redirects=True)
     html = response.data.decode()
 
     assert response.status_code == 200
     assert "<h1>Apprenticeship Coins</h1>" in html
+    assert "Logged in successfully." in html
 
     with client.session_transaction() as session:
         assert session["username"] == valid_login_data["username"]
@@ -24,9 +28,9 @@ def test_login_page_post_valid_credentials(mocker, client, valid_login_data, moc
 
 
 def test_login_page_post_invalid_credentials(mocker, client, invalid_login_data):
-    mocker.patch("utils.helpers.login_api_session", return_value=None)
+    mocker.patch("app.login_api_session", return_value=None)
 
-    response = client.post("/login", data=invalid_login_data)
+    response = client.post("/login?testing=1", data=invalid_login_data)
     html = response.data.decode()
 
     assert response.status_code == 200
@@ -36,8 +40,14 @@ def test_login_page_post_invalid_credentials(mocker, client, invalid_login_data)
 def test_login_page_post_server_error(mocker, client, valid_login_data):
     mocker.patch("app.login_api_session", side_effect=requests.RequestException("Server error"))
 
-    response = client.post("/login", data=valid_login_data)
+    response = client.post("/login?testing=1", data=valid_login_data)
     html = response.data.decode()
 
     assert response.status_code == 200
     assert "Server error. Try again later." in html
+
+
+def test_login_page_post_invalid_format(client):
+    response = client.post("/login?testing=1", data={"username": "", "password": "   "}, follow_redirects=True)
+    html = response.data.decode()
+    assert "Invalid username or password format." in html

@@ -31,6 +31,20 @@ def test_landing_page_with_no_coins(mocker, client):
     assert "grid" not in html
 
 
+def test_landing_page_backend_failure(mocker, client):
+    mocker.patch(
+        "controllers.coin_controller.CoinController.fetch_all_coins",
+        side_effect=Exception("Backend down")
+    )
+
+    response = client.get("/")
+    html = response.data.decode()
+
+    assert response.status_code == 200
+    assert "Could not load coins from backend." in html
+    assert "card" not in html
+
+
 # NAV BAR
 def test_landing_page_shows_logged_in_user_nav(logged_in_authenticated_user, mocker, mocked_coins):
     mocker.patch(
