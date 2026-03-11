@@ -9,7 +9,6 @@ def coin_controller():
 
 
 def test_controller_handles_model_exception(mocker, coin_controller):
-
     mocker.patch(
         "models.coin.Coin.fetch_coins_from_backend",
         side_effect=Exception("Backend error")
@@ -99,9 +98,9 @@ def test_coin_controller_can_create_coin(mocker, coin_controller, mocked_coin):
         return_value=mocked_coin
     )
 
-    new_coin = coin_controller.create_coin("Automate", duty_codes=["D1", "D2"])
+    new_coin = coin_controller.create_coin("Automate", duty_codes=["D1", "D2"], completed=True)
 
-    mock_create.assert_called_once_with("Automate", ["D1", "D2"])
+    mock_create.assert_called_once_with("Automate", ["D1", "D2"], True)
 
     assert new_coin == mocked_coin
 
@@ -134,13 +133,15 @@ def test_coin_controller_can_update_coin(mocker, coin_controller, mocked_coin):
     result = coin_controller.update_coin(
         coin_id=mocked_coin.id,
         name="Updated Name",
-        duty_codes=["D1", "D2"]
+        duty_codes=["D1", "D2"],
+        completed=True
     )
 
     mock_update.assert_called_once_with(
         mocked_coin.id,
         "Updated Name",
-        ["D1", "D2"]
+        ["D1", "D2"],
+        True
     )
 
     assert result == updated_coin

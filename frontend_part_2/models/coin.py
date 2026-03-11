@@ -102,7 +102,7 @@ class Coin:
             
     
     @classmethod
-    def update_coin(cls, coin_id, name=None, duty_codes=None, completed=False):
+    def update_coin(cls, coin_id, name=None, duty_codes=None, completed=None):
         try:
             request_body = {}
 

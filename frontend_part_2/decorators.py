@@ -7,11 +7,12 @@ def login_required(role=None):
         def decorated_function(*args, **kwargs):
             if not session.get("username"):
                 session.clear()
+                flash("You must be logged in to access this page.", "error")
                 return redirect(url_for("login_page"))
 
             if role and session.get("role") != role:
  
-                flash("Access denied. Insufficient permissions.", "error")
+                flash("You do not have permission to access this page.", "error")
                 return redirect(url_for("landing_page"))
 
             try:

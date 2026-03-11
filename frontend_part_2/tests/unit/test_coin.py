@@ -74,7 +74,7 @@ def test_toggle_coin_complete_from_false_to_true(mock_api_session_post):
     }
     mock_post = mock_api_session_post("models.coin", response_data)
     coin = Coin.toggle_complete("55555555-5555-5555-5555-555555555555")
-    expected_url = f"http://{BACKEND_URL}/coins/55555555-5555-5555-5555-555555555555/complete"
+    expected_url = f"{BACKEND_URL}/coins/55555555-5555-5555-5555-555555555555/complete"
     mock_post.assert_called_with(expected_url)
     assert isinstance(coin, Coin)
     assert coin.completed is True
@@ -89,7 +89,7 @@ def test_toggle_coin_complete_from_true_to_false(mock_api_session_post):
     }
     mock_post = mock_api_session_post("models.coin", response_data)
     coin = Coin.toggle_complete("55555555-5555-5555-5555-555555555555")
-    expected_url = f"http://{BACKEND_URL}/coins/55555555-5555-5555-5555-555555555555/complete"
+    expected_url = f"{BACKEND_URL}/coins/55555555-5555-5555-5555-555555555555/complete"
     mock_post.assert_called_with(expected_url)
     assert isinstance(coin, Coin)
     assert coin.completed is False
@@ -113,10 +113,10 @@ def test_create_coin_with_duties_success(mock_api_session_post):
         "completed": False
     }
     mock_post = mock_api_session_post("models.coin", response_data)
-    coin, error = Coin.create_coin("Newly Created Coin", duty_codes=["D2"])
+    coin, error = Coin.create_coin("Newly Created Coin", duty_codes=["D2"], completed=False)
 
-    expected_url = f"http://{BACKEND_URL}/v3/coins"
-    mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": ["D2"]})
+    expected_url = f"{BACKEND_URL}/v3/coins"
+    mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": ["D2"], "completed": False})
     assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == response_data["duties"]
@@ -132,8 +132,8 @@ def test_create_coin_without_duties_success(mock_api_session_post):
     }
     mock_post = mock_api_session_post("models.coin", response_data)
     coin, error = Coin.create_coin("Newly Created Coin", duty_codes=[])
-    expected_url = f"http://{BACKEND_URL}/v3/coins"
-    mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": []})
+    expected_url = f"{BACKEND_URL}/v3/coins"
+    mock_post.assert_called_with(expected_url, json={"name": "Newly Created Coin", "duty_codes": [], "completed": False})
     assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == []
@@ -162,10 +162,11 @@ def test_update_coin_success(mock_api_session_patch):
     coin, error = Coin.update_coin(
         coin_id=response_data["id"],
         name="Updated Coin",
-        duty_codes=["D3"]
+        duty_codes=["D3"],
+        completed=True
     )
-    expected_url = f"http://{BACKEND_URL}/v3/coins/{response_data['id']}"
-    mock_patch.assert_called_with(expected_url, json={"name": "Updated Coin", "duty_codes": ["D3"]})
+    expected_url = f"{BACKEND_URL}/v3/coins/{response_data['id']}"
+    mock_patch.assert_called_with(expected_url, json={"name": "Updated Coin", "duty_codes": ["D3"], "completed": True})
     assert error is None
     assert coin.name == response_data["name"]
     assert coin.duties == response_data["duties"]
@@ -188,7 +189,7 @@ def test_update_coin_name_only(mock_api_session_patch):
     )
 
     mock_patch.assert_called_once_with(
-        f"http://{BACKEND_URL}/v3/coins/{response_data['id']}",
+        f"{BACKEND_URL}/v3/coins/{response_data['id']}",
         json={"name": "Updated Name"}
     )
 
@@ -212,7 +213,7 @@ def test_update_coin_duties_only(mock_api_session_patch):
     )
 
     mock_patch.assert_called_once_with(
-        f"http://{BACKEND_URL}/v3/coins/{response_data['id']}",
+        f"{BACKEND_URL}/v3/coins/{response_data['id']}",
         json={"duty_codes": ["D1"]}
     )
 
@@ -238,7 +239,7 @@ def test_delete_coin_success(mock_api_session_delete):
     result = Coin.delete_coin("44444444-4444-4444-4444-444444444444")
 
     mock_delete.assert_called_once_with(
-        f"http://{BACKEND_URL}/v2/coins/44444444-4444-4444-4444-444444444444"
+        f"{BACKEND_URL}/v2/coins/44444444-4444-4444-4444-444444444444"
     )
 
     assert result is True

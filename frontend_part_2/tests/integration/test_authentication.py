@@ -30,6 +30,7 @@ def test_admin_routes_require_login(client, url):
     html = response.data.decode()
     assert "You must be logged in to access this page." in html
 
+
 def test_admin_routes_require_admin(client, logged_in_authenticated_user):
     client = logged_in_authenticated_user
     urls = [
@@ -51,6 +52,7 @@ def test_toggle_coin_complete_requires_login(client, mocked_coins):
     html = response.data.decode()
     assert "You must be logged in to access this page." in html
 
+
 def test_toggle_coin_complete_authenticated_user(mocker, logged_in_authenticated_user, mocked_coins):
     client = logged_in_authenticated_user
     coin_id = mocked_coins[0].id
@@ -61,50 +63,3 @@ def test_toggle_coin_complete_authenticated_user(mocker, logged_in_authenticated
     html = response.data.decode()
     assert response.status_code == 200
     assert "Coins" in html or "<h1>Apprenticeship Coins</h1>" in html
-
-
-# TEST ADMIN CREATE COIN/DUTY SUCCESS
-def test_admin_create_coin_flash_success(mocker, logged_in_admin_user):
-    client = logged_in_admin_user
-    mocker.patch("controllers.coin_controller.CoinController.create_coin", return_value=("coin_obj", None))
-
-    response = client.post(
-        "/admin/coins/create",
-        data={"name": "Coin A", "duty_codes": ""},
-        follow_redirects=True
-    )
-    html = response.data.decode()
-    
-    assert "Coin created successfully." in html
-    assert response.status_code == 200
-
-
-def test_admin_create_duty_flash_success(mocker, logged_in_admin_user, mocked_coins):
-    client = logged_in_admin_user
-
-    mocker.patch(
-        "controllers.duty_controller.DutyController.create_duty",
-        return_value=("duty_obj", None)
-    )
-
-    mocker.patch(
-        "controllers.coin_controller.CoinController.fetch_all_coins",
-        return_value=mocked_coins
-    )
-
-    response = client.post(
-        "/admin/duties/create",
-        data={
-            "code": "D100",
-            "name": "New Duty",
-            "description": "Duty Description",
-            "coin_ids": [mocked_coins[0].id, mocked_coins[1].id],
-            "ksb_codes": "K1,B1,S1"
-        },
-        follow_redirects=True
-    )
-
-    html = response.data.decode()
-    
-    assert "Duty created successfully." in html
-    assert response.status_code == 200

@@ -1,5 +1,5 @@
-def test_admin_create_duty_flash_success(mocker, logged_in_admin_user, mocked_coins):
-    client = logged_in_admin_user
+def test_admin_create_duty_flash_success(mocker, logged_in_admin_user, mocked_coins, mocked_duties):
+    mocker.patch("utils.helpers.login_api_session", return_value={"role": "admin"})
     mocker.patch(
         "controllers.duty_controller.DutyController.create_duty",
         return_value=("new_duty_obj", None)
@@ -9,7 +9,12 @@ def test_admin_create_duty_flash_success(mocker, logged_in_admin_user, mocked_co
         return_value=mocked_coins
     )
 
-    response = client.post(
+    mocker.patch(
+        "controllers.duty_controller.DutyController.fetch_all_duties",
+        return_value=mocked_duties
+    )
+
+    response = logged_in_admin_user.post(
         "/admin/duties/create",
         data={
             "code": "D99",
@@ -25,9 +30,11 @@ def test_admin_create_duty_flash_success(mocker, logged_in_admin_user, mocked_co
     assert "Duty created successfully." in html
     assert response.status_code == 200
 
+
 def test_admin_edit_duty_flash_success(mocker, logged_in_admin_user, mocked_duties, mocked_coins):
-    client = logged_in_admin_user
     duty_code = mocked_duties[0].code
+
+    mocker.patch("utils.helpers.login_api_session", return_value={"role": "admin"})
 
     mocker.patch(
         "controllers.duty_controller.DutyController.fetch_duty",
@@ -42,7 +49,12 @@ def test_admin_edit_duty_flash_success(mocker, logged_in_admin_user, mocked_duti
         return_value=mocked_coins
     )
 
-    response = client.post(
+    mocker.patch(
+        "controllers.duty_controller.DutyController.fetch_all_duties",
+        return_value=mocked_duties
+    )
+
+    response = logged_in_admin_user.post(
         f"/admin/duties/{duty_code}/edit",
         data={
             "name": "Updated Name",
@@ -58,16 +70,22 @@ def test_admin_edit_duty_flash_success(mocker, logged_in_admin_user, mocked_duti
     assert response.status_code == 200
 
 
-def test_admin_delete_duty_flash_success(mocker, logged_in_admin_user):
-    client = logged_in_admin_user
+def test_admin_delete_duty_flash_success(mocker, logged_in_admin_user, mocked_duties):
     duty_code = "D99"
+
+    mocker.patch("utils.helpers.login_api_session", return_value={"role": "admin"})
 
     mocker.patch(
         "controllers.duty_controller.DutyController.delete_duty",
         return_value=True
     )
 
-    response = client.post(
+    mocker.patch(
+        "controllers.duty_controller.DutyController.fetch_all_duties",
+        return_value=mocked_duties
+    )
+
+    response = logged_in_admin_user.post(
         f"/admin/duties/{duty_code}/delete",
         follow_redirects=True
     )
