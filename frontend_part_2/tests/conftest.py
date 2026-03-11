@@ -168,9 +168,10 @@ def mocked_duty():
         name="Duty 1",
         description="Duty 1 Description",
         coins=[
-            {"name": "Automate"},
-            {"name": "Houston"}
-        ]
+            {"name": "Automate", "id": "11111111-1111-1111-1111-111111111111"},
+            {"name": "Houston", "id": "22222222-2222-2222-2222-222222222222"}
+        ],
+        ksbs=["K1", "B1", "S3"]
     )
 
 

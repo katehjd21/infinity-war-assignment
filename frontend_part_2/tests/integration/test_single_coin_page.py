@@ -112,6 +112,7 @@ def test_single_coin_page_shows_toggle_when_logged_in(mocker, logged_in_authenti
     html = response.data.decode()
 
     assert "Mark Complete" in html or "Mark Incomplete" in html
+    assert 'form method="POST" action="/toggle_coin_complete"' in html
 
 
 def test_single_coin_page_has_back_link(mocker, client, mocked_coin):

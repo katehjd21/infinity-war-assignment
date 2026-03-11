@@ -1,4 +1,4 @@
-def test_duty_detail_page_shows_duty_information_with_coins(mocker, client, mocked_duty):
+def test_duty_detail_page_shows_duty(mocker, client, mocked_duty):
     mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=mocked_duty)
 
     response = client.get(f'/duties/{mocked_duty.code}')
@@ -9,7 +9,16 @@ def test_duty_detail_page_shows_duty_information_with_coins(mocker, client, mock
     assert mocked_duty.name in html
     assert mocked_duty.description in html
 
+
+def test_duty_detail_shows_associated_coins_with_correct_links(mocker, client, mocked_duty):
+    mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=mocked_duty)
+    
+    response = client.get(f"/duties/{mocked_duty.code}")
+    html = response.data.decode()
+    
     for coin in mocked_duty.coins:
+        expected_href = f'/coin/{coin["id"]}'
+        assert expected_href in html
         assert coin["name"] in html
 
 
@@ -23,6 +32,27 @@ def test_duty_detail_shows_message_if_no_coins(mocker, client, mocked_duty):
 
     assert response.status_code == 200
     assert "No coins associated with this duty." in html
+
+
+def test_duty_detail_shows_ksb_codes(mocker, client, mocked_duty):
+    mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=mocked_duty)
+    
+    response = client.get(f"/duties/{mocked_duty.code}")
+    html = response.data.decode()
+    
+    for ksb in mocked_duty.ksbs:
+        assert ksb in html
+
+
+def test_duty_detail_shows_message_if_no_ksbs(mocker, client, mocked_duty):
+    duty_no_ksbs = mocked_duty
+    duty_no_ksbs.ksbs = []
+    mocker.patch("controllers.duty_controller.DutyController.fetch_duty", return_value=duty_no_ksbs)
+    
+    response = client.get(f"/duties/{duty_no_ksbs.code}")
+    html = response.data.decode()
+    
+    assert "No KSB codes for this duty." in html
 
 
 def test_duty_detail_page_not_found(mocker, client):

@@ -49,7 +49,7 @@ def landing_page():
         coins = [Coin(c["name"], c["id"], c.get("duties", [])) for c in coins_data]
     else:
         coins = CoinController.fetch_all_coins()
-    return render_template("coins.html", coins=coins)
+    return render_template("coins_landing_page.html", coins=coins)
 
 
 @app.route('/coin/<coin_id>')
