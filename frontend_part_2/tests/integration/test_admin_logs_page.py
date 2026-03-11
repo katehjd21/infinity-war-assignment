@@ -50,3 +50,32 @@ def test_admin_logs_page_server_error(mocker, logged_in_admin_user):
     assert "<th>Path</th>" in html
     assert "<th>User</th>" in html
     assert "<th>Timestamp</th>" in html
+
+
+def test_admin_logs_page_empty(mocker, logged_in_admin_user):
+    mocker.patch("models.coin.api_session.get", return_value=Mock(
+        status_code=200,
+        json=lambda: [],
+        raise_for_status=lambda: None
+    ))
+
+    response = logged_in_admin_user.get("/admin/logs")
+    html = response.data.decode()
+
+    assert response.status_code == 200
+    assert "<h1>Last 100 HTTP Requests</h1>" in html
+    assert "<th>Method</th>" in html
+    assert "<th>Path</th>" in html
+    assert "<th>User</th>" in html
+    assert "<th>Timestamp</th>" in html
+    assert "<td>" not in html
+
+
+def test_admin_logs_page_backend_error(mocker, logged_in_admin_user):
+    mocker.patch("models.coin.api_session.get", side_effect=requests.RequestException("Server error"))
+
+    response = logged_in_admin_user.get("/admin/logs", follow_redirects=True)
+    html = response.data.decode()
+
+    assert response.status_code == 200
+    assert "Could not load logs from backend." in html

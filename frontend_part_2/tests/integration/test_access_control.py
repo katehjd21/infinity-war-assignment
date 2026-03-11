@@ -26,7 +26,6 @@ def test_admin_routes_require_login(client, url):
     ]
 )
 def test_admin_routes_require_admin(client, logged_in_authenticated_user, url):
-    """Ensure authenticated non-admin users cannot access admin pages."""
     client = logged_in_authenticated_user
     response = client.get(url, follow_redirects=True)
     html = response.data.decode()

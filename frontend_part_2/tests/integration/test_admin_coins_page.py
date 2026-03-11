@@ -43,6 +43,18 @@ def test_admin_coins_page_row_details(mocker, logged_in_admin_user, mocked_coins
         assert '<button type="submit" class="delete-button">' in html
 
 
+def test_admin_coins_create_link(mocker, logged_in_admin_user, mocked_coins):
+    mocker.patch(
+        "controllers.coin_controller.CoinController.fetch_all_coins",
+        return_value=mocked_coins
+    )
+
+    response = logged_in_admin_user.get("/admin/coins")
+    html = response.data.decode()
+
+    assert 'href="/admin/coins/create"' in html
+
+
 def test_admin_coins_page_redirect_non_admin(logged_in_authenticated_user, mocker, mocked_coins):
     mocker.patch("controllers.coin_controller.CoinController.fetch_all_coins", return_value=mocked_coins)
 
@@ -71,7 +83,8 @@ def test_admin_coins_page_with_no_coins(mocker, logged_in_admin_user):
 
     assert response.status_code == 200
     assert "<tbody>" in html
-    assert html.count("<tr>") == 0 or html.count("<tr>")
+    assert "Edit" not in html
+    assert "Delete" not in html
 
 
 def test_admin_coins_page_backend_failure(mocker, logged_in_admin_user):
