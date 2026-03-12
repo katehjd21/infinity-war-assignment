@@ -2,6 +2,7 @@
 package_update: true
 packages:
   - docker.io
+  - docker-compose
   - git
 
 runcmd:
@@ -17,25 +18,7 @@ runcmd:
   - echo "DATABASE=${database}" >> /home/ubuntu/app/backend/.env
   - echo "SSLMODE=${ssl_mode}" >> /home/ubuntu/app/backend/.env
 
-  - docker network create infinity-war-network || true
+  - echo "SECRET_KEY=${secret_key}" > /home/ubuntu/app/frontend_part_2/.env
+  - echo "BACKEND_URL=http://backend:5000" >> /home/ubuntu/app/frontend_part_2/.env
 
-  - docker rm -f backend-app || true
-  - docker rm -f frontend-app || true
-
-  - cd /home/ubuntu/app && docker build -t infinity-war-backend ./backend
-  - cd /home/ubuntu/app && docker run -d \
-      --name backend-app \
-      --network infinity-war-network \
-      -p 5000:5000 \
-      -v /home/ubuntu/app/backend/.env:/app/.env \
-      --restart unless-stopped \
-      infinity-war-backend
-
-  - cd /home/ubuntu/app && docker build -t infinity-war-frontend ./frontend_part_2
-  - cd /home/ubuntu/app && docker run -d \
-      --name frontend-app \
-      --network infinity-war-network \
-      -p 80:8080 \
-      --env-file /home/ubuntu/app/frontend_part_2/.env \
-      --restart unless-stopped \
-      infinity-war-frontend
+  - cd /home/ubuntu/app && docker-compose up -d --build
