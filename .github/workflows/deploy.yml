@@ -105,6 +105,9 @@ jobs:
             -var="database=${{ secrets.DATABASE }}" \
             -var="ssl_mode=${{ secrets.SSLMODE }}" \
             -var="secret_key=${{ secrets.SECRET_KEY }}"
+      
+      - name: Terraform Validate
+        run: terraform validate
 
       - name: Terraform Apply
         run: |

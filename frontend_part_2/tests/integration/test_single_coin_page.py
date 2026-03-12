@@ -1,11 +1,26 @@
 from models.coin import Coin
 
+# def test_single_coin_page_shows_coin_name(mocker, client, mocked_coin):
+#     mocker.patch(
+#         "controllers.coin_controller.CoinController.fetch_coin_by_id",
+#         return_value=mocked_coin
+#     )
+
+#     response = client.get(f'/coin/{mocked_coin.id}')
+#     html = response.data.decode()
+
+#     assert response.status_code == 200
+#     assert mocked_coin.name in html
+
+
 def test_single_coin_page_shows_coin_name(mocker, client, mocked_coin):
+    # Mock the controller
     mocker.patch(
         "controllers.coin_controller.CoinController.fetch_coin_by_id",
         return_value=mocked_coin
     )
 
+    # Unauthenticated client should still see the coin name
     response = client.get(f'/coin/{mocked_coin.id}')
     html = response.data.decode()
 

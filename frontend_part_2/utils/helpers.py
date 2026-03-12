@@ -2,6 +2,7 @@ import os
 import json
 from api_session import api_session
 import requests
+from flask import request
 import re
 
 BACKEND_URL = os.environ.get("BACKEND_URL", "localhost:5000")
@@ -17,6 +18,14 @@ def load_fixture(filename, folder="cypress/fixtures"):
 
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def split_csv_field(form, field_name):
+    return [v.strip() for v in form.get(field_name, "").split(",") if v.strip()]
+
+
+def get_fixture_file(default="coins.json"):
+    return request.args.get("fixture", default)
 
 
 def login_api_session(username, password):
