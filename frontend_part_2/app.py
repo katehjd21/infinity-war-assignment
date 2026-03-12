@@ -297,6 +297,7 @@ def admin_delete_duty(duty_code):
 
 
 @app.route("/admin/logs")
+@limiter.limit("20 per minute")
 @admin_required
 def admin_logs_page():
     logs = []
