@@ -86,6 +86,7 @@ def coin_page(coin_id):
 
 
 @app.route("/toggle_coin_complete", methods=["POST"])
+@limiter.limit("10 per minute")
 @login_required()
 def toggle_coin_complete():
     coin_id = request.form.get("coin_id")
@@ -153,6 +154,7 @@ def logout():
 
 
 @app.route("/admin/coins")
+@limiter.limit("20 per minute")
 @admin_required
 def admin_coins_page():
     coins = CoinController.fetch_all_coins()
@@ -160,6 +162,7 @@ def admin_coins_page():
 
 
 @app.route("/admin/coins/create", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_create_coin():
     if request.method == "POST":
@@ -184,6 +187,7 @@ def admin_create_coin():
 
 
 @app.route("/admin/coins/<coin_id>/edit", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_edit_coin(coin_id):
     coin = CoinController.fetch_coin_by_id(coin_id)
@@ -211,6 +215,7 @@ def admin_edit_coin(coin_id):
 
 
 @app.route("/admin/coins/<coin_id>/delete", methods=["POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_delete_coin(coin_id):
     success = CoinController.delete_coin(coin_id)
@@ -221,6 +226,7 @@ def admin_delete_coin(coin_id):
 
 
 @app.route("/admin/duties")
+@limiter.limit("20 per minute")
 @admin_required
 def admin_duties_page():
     duties = DutyController.fetch_all_duties()
@@ -228,6 +234,7 @@ def admin_duties_page():
 
 
 @app.route("/admin/duties/create", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_create_duty():
     all_coins = CoinController.fetch_all_coins()
@@ -251,6 +258,7 @@ def admin_create_duty():
 
 
 @app.route("/admin/duties/<duty_code>/edit", methods=["GET", "POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_edit_duty(duty_code):
     duty = DutyController.fetch_duty(duty_code)
@@ -278,6 +286,7 @@ def admin_edit_duty(duty_code):
 
 
 @app.route("/admin/duties/<duty_code>/delete", methods=["POST"])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_delete_duty(duty_code):
     success = DutyController.delete_duty(duty_code)
