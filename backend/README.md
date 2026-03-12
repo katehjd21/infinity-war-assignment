@@ -21,8 +21,8 @@ The API is built with **Flask** and uses a **PostgreSQL database** for storage. 
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/katehjd21/endgame_assignment.git
-cd endgame_assignment/backend
+git clone https://github.com/katehjd21/infinity-war-assignment.git
+cd infinity-war-assignment/backend
 ```
 
  2. Create a virtual environment:

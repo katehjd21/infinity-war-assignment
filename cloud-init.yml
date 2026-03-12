@@ -8,16 +8,28 @@ runcmd:
   - systemctl enable docker
   - systemctl start docker
 
-  - git clone https://github.com/katehjd21/endgame_assignment.git /home/ubuntu/app
+  - git clone https://github.com/katehjd21/infinity-war-assignment.git /home/ubuntu/app
 
   - echo "DB_USERNAME=${db_username}" > /home/ubuntu/app/backend/.env
   - echo "DB_PASSWORD=${db_password}" >> /home/ubuntu/app/backend/.env
   - echo "HOST=${host}" >> /home/ubuntu/app/backend/.env
   - echo "PORT=${port}" >> /home/ubuntu/app/backend/.env
   - echo "DATABASE=${database}" >> /home/ubuntu/app/backend/.env
+  - echo "SSLMODE=${ssl_mode}" >> /home/ubuntu/app/backend/.env
 
-  - cd /home/ubuntu/app && docker build -t endgame-backend ./backend
-  - cd /home/ubuntu/app && docker run -d -p 5000:5000 -v /home/ubuntu/app/backend/.env:/app/.env --name backend-app --restart unless-stopped endgame-backend
+  - cd /home/ubuntu/app && docker build -t infinity-war-backend ./backend
+  - cd /home/ubuntu/app && docker run -d -p 5000:5000 \
+      -v /home/ubuntu/app/backend/.env:/app/.env \
+      --name backend-app \
+      --restart unless-stopped \
+      infinity-war-backend
 
-  - cd /home/ubuntu/app && docker build -t endgame-frontend ./frontend
-  - cd /home/ubuntu/app && docker run -d -p 80:8080 --name frontend-app --restart unless-stopped endgame-frontend
+  - echo "SECRET_KEY=${secret_key}" > /home/ubuntu/app/frontend_part_2/.env
+  - echo "BACKEND_URL=http://localhost:5000" >> /home/ubuntu/app/frontend_part_2/.env
+
+  - cd /home/ubuntu/app && docker build -t infinity-war-frontend ./frontend_part_2
+  - cd /home/ubuntu/app && docker run -d -p 80:8080 \
+      --env-file /home/ubuntu/app/frontend_part_2/.env \
+      --name frontend-app \
+      --restart unless-stopped \
+      infinity-war-frontend

@@ -12,12 +12,14 @@
         "id": "uuid-2",
         "name": "Houston"
       }
-    ]
+    ],
+    "ksbs": ["K1", "S1", "B1"]
   },
   {
     "code": "uuid-empty-duty",
     "name": "Empty Duty",
     "description": "No coins associated",
-    "coins": [] 
+    "coins": [],
+    "ksbs": []
   }
 ]

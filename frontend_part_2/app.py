@@ -10,7 +10,9 @@ from models.coin import Coin
 from decorators import login_required, admin_required
 import requests
 import os
-   
+from dotenv import load_dotenv
+
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=15)
@@ -40,32 +42,35 @@ def handle_session_persistence():
     session.permanent = True
 
 
+@app.route("/test-login")
+def test_login():
+    if request.args.get("testing") != "1":
+        return "Not allowed", 403
+
+    role = request.args.get("role", "user")
+
+    session["username"] = "testuser"
+    session["role"] = role
+
+    return "Logged in for testing"
+
+
 @app.route('/')
 def landing_page():
-    testing_mode = request.args.get("testing") == "1"
-    if testing_mode:
-        fixture_file = request.args.get("fixture", "coins.json")
-        coins_data = load_fixture(fixture_file)
-        coins = [Coin(c["name"], c["id"], c.get("duties", [])) for c in coins_data]
-    else:
-        try:
-            coins = CoinController.fetch_all_coins()
-        except Exception:
-            flash("Could not load coins from backend.", "error")
-            coins = []
-
+    testing_mode = os.getenv("TESTING") == "1"
+    fixture_file = request.args.get("fixture", "coins.json")
+    try:
+        coins = CoinController.fetch_all_coins(testing=testing_mode, fixture_file=fixture_file)
+    except Exception:
+        flash("Could not load coins from backend.", "error")
+        coins = []
     return render_template("coins_landing_page.html", coins=coins)
 
 
 @app.route('/coin/<coin_id>')
 def coin_page(coin_id):
-    testing_mode = request.args.get("testing") == "1"
-    if testing_mode:
-        coins_data = load_fixture('coins.json')
-        coin_dict = next((c for c in coins_data if c["id"] == coin_id), None)
-        coin = Coin(coin_dict["name"], coin_dict["id"], coin_dict.get("duties", [])) if coin_dict else None
-    else:
-        coin = CoinController.fetch_coin_by_id(coin_id)
+    testing_mode = os.getenv("TESTING") == "1"
+    coin = CoinController.fetch_coin_by_id(coin_id, testing=testing_mode)
     if not coin:
         return "Coin not found", 404
     return render_template("single_coin.html", coin=coin)
@@ -82,20 +87,11 @@ def toggle_coin_complete():
     return redirect(request.referrer or "/")
 
 
-@app.route("/duties/<duty_code>")
+@app.route('/duties/<duty_code>')
 def duty_page(duty_code):
     coin_id = request.args.get("coin_id")
-    testing_mode = request.args.get("testing") == "1"
-    if testing_mode:
-        duty_data = load_fixture('duties.json')
-        duty_dict = next((d for d in duty_data if d["code"] == duty_code), None)
-        if duty_dict:
-            duty = duty_dict
-            duty["coins"] = [Coin(c["name"], c["id"]) for c in duty.get("coins", [])]
-        else:
-            duty = None
-    else:
-        duty = DutyController.fetch_duty(duty_code)
+    testing_mode = os.getenv("TESTING") == "1"
+    duty = DutyController.fetch_duty(duty_code, testing=testing_mode)
     if not duty:
         return "Duty not found", 404
     return render_template("duty_detail.html", duty=duty, coin_id=coin_id)
@@ -104,9 +100,15 @@ def duty_page(duty_code):
 @app.route("/login", methods=["GET", "POST"])
 @limiter.limit("5 per minute")
 def login_page():
+    testing_mode = os.getenv("TESTING") == "1"
+    simulate_error = request.args.get("error") == "server"
+
     if request.method == "POST":
         username = request.form.get("username").strip()
         password = request.form.get("password").strip()
+
+        if testing_mode and simulate_error:
+            return render_template("login.html", error="Server error. Try again later.")
 
         if not is_valid_username(username) or not is_valid_password(password):
             flash("Invalid username or password format.", "error")
@@ -120,7 +122,6 @@ def login_page():
 
             session["role"] = data.get("role")
             session["username"] = username
-
             flash("Logged in successfully.", "success")
             return redirect("/")
 

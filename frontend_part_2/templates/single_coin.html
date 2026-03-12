@@ -44,8 +44,9 @@
         <p class="no-duties-message muted">No duties associated with this coin.</p>
     {% endif %}
 
-    <a class="back-link" href="{{ url_for('landing_page') }}">
-        Back to all coins
+    <a class="back-link"
+    href="{{ url_for('landing_page', testing=request.args.get('testing')) }}">
+    Back to all coins
     </a>
 </div>
 {% endblock %}

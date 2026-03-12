@@ -5,3 +5,8 @@ variable "db_password" {
 variable "host" {}
 variable "port" {}
 variable "database" {}
+variable "ssl_mode" {}
+
+variable "secret_key" {
+  sensitive = true
+}

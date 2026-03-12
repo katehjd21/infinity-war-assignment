@@ -1,4 +1,4 @@
-name: Deploy Endgame Assignment
+name: Test & Deploy Infinity War Assignment
 
 on:
   push:
@@ -56,7 +56,7 @@ jobs:
     
       - name: Install Dependencies
         run: |
-          cd frontend/
+          cd frontend_part_2/
           python3 -m venv .venv
           source .venv/bin/activate
           python3 -m pip install --upgrade pip
@@ -65,7 +65,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          cd frontend/
+          cd frontend_part_2/
           source .venv/bin/activate
           pytest tests/
 
@@ -102,7 +102,9 @@ jobs:
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="host=${{ secrets.HOST }}" \
             -var="port=${{ secrets.PORT }}" \
-            -var="database=${{ secrets.DATABASE }}"
+            -var="database=${{ secrets.DATABASE }}" \
+            -var="ssl_mode"=${{ secrets.SSLMODE }}" \
+            -var="secret_key=${{ secrets.SECRET_KEY }}"
 
       - name: Terraform Apply
         run: |
@@ -111,4 +113,6 @@ jobs:
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="host=${{ secrets.HOST }}" \
             -var="port=${{ secrets.PORT }}" \
-            -var="database=${{ secrets.DATABASE }}"
+            -var="database=${{ secrets.DATABASE }}" \
+            -var="ssl_mode"=${{ secrets.SSLMODE }}" \
+            -var="secret_key=${{ secrets.SECRET_KEY }}"

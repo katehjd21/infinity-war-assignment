@@ -104,7 +104,7 @@ resource "aws_route_table_association" "rt_association" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_instance" "endgame-assignment" {
+resource "aws_instance" "infinity-war-assignment" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
 
@@ -118,9 +118,11 @@ resource "aws_instance" "endgame-assignment" {
     host        = var.host
     port        = var.port
     database    = var.database
+    ssl_mode    = var.ssl_mode
+    secret_key   = var.secret_key
   })
 
   tags = {
-    Name = "kds-endgame-assignment"
+    Name = "kds-infinity-war-assignment"
   }
 }

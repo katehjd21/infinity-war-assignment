@@ -1,0 +1,4 @@
+[
+  { "method": "GET", "path": "/login", "user": "user1", "timestamp": "2026-03-05T10:00:00Z" },
+  { "method": "POST", "path": "/coin/1", "user": "user2", "timestamp": "2026-03-05T11:00:00Z" }
+]
